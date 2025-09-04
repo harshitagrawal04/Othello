@@ -42,9 +42,16 @@ void resetBoard(CellState board[8][8]) {
     board[4][3] = CellState::White;
 }
 
-// display the board
+// display the board with coordinates 
 void displayBoard(CellState board[8][8]) {
+    cout << "  ";
+    for (int col = 0; col < 8; col++) {
+        cout << col << " ";   // column numbers
+    }
+    cout << endl;
+
     for (int row = 0; row < 8; row++) {
+        cout << row << " ";   // row numbers
         for (int col = 0; col < 8; col++) {
             cout << cellToChar(board[row][col]) << " ";
         }
