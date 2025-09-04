@@ -1,0 +1,4 @@
+# ninja log v6
+1	670	1756994408270335525	CMakeFiles/Othello.dir/src/main.cpp.o	e1076a45e5ca2bc5
+2	683	1756994408271042028	CMakeFiles/Othello.dir/src/gameBoard.cpp.o	8c5730c689862a41
+683	786	1756994408951541205	Othello	d980ee425bc3f4dc

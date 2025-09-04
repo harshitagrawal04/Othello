@@ -13,6 +13,7 @@ int directions[8][2] = {
     { 1, -1}, { 1, 0}, { 1, 1}
 };
 
+
 char cellToChar(CellState cell) {
     if (cell == CellState::Empty) return '.';
     if (cell == CellState::Black) return 'B';
