@@ -1,16 +1,68 @@
 #include <iostream>
+#include <vector>
 
-// TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
+using namespace std;
+
+// declaring the states in which each cell can be
+enum class CellState {
+    Empty,
+    Black,
+    White
+};
+
+// helper function to display the value of cell
+char cellToChar(CellState cell) {
+    if (cell == CellState::Empty) return '.';
+    if (cell == CellState::Black) return 'B';
+    return 'W';
+}
+
+// setting all the cells to empty
+// void resetBoard(cellState[][])
+
+
+struct Move {
+    int row;
+    int col;
+};
+
+
+
 int main() {
-    // TIP Press <shortcut actionId="RenameElement"/> when your caret is at the <b>lang</b> variable name to see how CLion can help you rename it.
-    auto lang = "C++";
-    std::cout << "Hello and welcome to " << lang << "!\n";
+    CellState board[8][8];
 
-    for (int i = 1; i <= 5; i++) {
-        // TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-        std::cout << "i = " << i << std::endl;
+    for (int row = 0; row < 8; row++) {
+        for (int col = 0; col < 8; col++) {
+            board[row][col] = CellState::Empty;
+        }
     }
 
+
+    board[3][3] = CellState::Black;
+    board[4][4] = CellState::Black;
+    board[3][4] = CellState::White;
+    board[4][3] = CellState::White;
+
+
+    for (int row = 0; row < 8; row++) {
+        for (int col = 0; col < 8; col++) {
+            cout << cellToChar(board[row][col]) << " ";
+        }
+        cout << endl;
+    }
+
+    vector<Move> moves;
+
+    moves.push_back({0,0});
+    moves.push_back({0,1});
+    moves.push_back({1,0});
+
+    for (int i = 0; i < moves.size(); i++) {
+        cout << moves[i].row << " " << moves[i].col << endl;
+    }
+
+
+
+
     return 0;
-    // TIP See CLion help at <a href="https://www.jetbrains.com/help/clion/">jetbrains.com/help/clion/</a>. Also, you can try interactive lessons for CLion by selecting 'Help | Learn IDE Features' from the main menu.
 }
