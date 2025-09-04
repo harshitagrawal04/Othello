@@ -42,7 +42,7 @@ void resetBoard(CellState board[8][8]) {
     board[4][3] = CellState::White;
 }
 
-// display the board with coordinates 
+// display the board with coordinates
 void displayBoard(CellState board[8][8]) {
     cout << "  ";
     for (int col = 0; col < 8; col++) {
@@ -166,6 +166,21 @@ void makeMove(Move move, CellState board[8][8], CellState currentPlayer) {
     }
 }
 
+// counts the number of total white and black disk on the board 
+pair<int,int> countDisk(CellState board[8][8]) {
+    int white = 0;
+    int black = 0;
+
+    for (const auto& row: board) {
+        for (const auto& col: board) {
+            if (col == CellState::White) white ++;
+            else if (col == CellState::Black) black ++;
+        }
+    }
+
+    return  {white, black};
+}
+
 int main() {
     CellState board[8][8];
 
@@ -175,8 +190,15 @@ int main() {
 
     CellState currentPlayer = CellState::White;
 
-    while (!findAllLegalMoves(board, currentPlayer).empty()) {
+    while (!findAllLegalMoves(board, CellState::White).empty() &&
+           !findAllLegalMoves(board, CellState::Black).empty()) {
         vector<Move> moves = findAllLegalMoves(board, currentPlayer);
+
+        if (moves.empty()) {
+            currentPlayer = (currentPlayer == CellState::White)
+             ? CellState::Black
+             : CellState::White;
+        }
 
         cout << "available moves: ";
         displayMoves(moves);
@@ -185,20 +207,28 @@ int main() {
         cout << "Enter your move (row and col): ";
         cin >> r >> c;
         Move move = {r,c};
-        if (legalMove(move, board, currentPlayer)) {
+        if (r < 0 || r >= 8 || c < 0 || c >= 8) {
+            cout << "Out of bounds! Try again.\n";
+        }
+        else if (legalMove(move, board, currentPlayer)) {
             makeMove(move, board, currentPlayer);
             displayBoard(board);
             currentPlayer = (currentPlayer == CellState::White)
              ? CellState::Black
              : CellState::White;
-
-        } else {
+        }
+        else {
             cout << "Illegal move! Try again.\n";
         }
     }
 
+    auto [white, black] = countDisk(board);
 
+    cout << "Final Score -> Black: " << black << " White: " << white << endl;
 
+    if (black>white) cout << "Black wins!\n";
+    else if (black<white) cout << "White wins!\n";
+    else cout << "Draw!\n";
 
     return 0;
 }
