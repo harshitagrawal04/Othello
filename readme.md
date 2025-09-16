@@ -1,4 +1,3 @@
-Nice — this is a clear, achievable project. Below is a **complete roadmap** for building a polished, pure-C++ Reversi/Othello for **macOS** with a game-style canvas UI and three AI difficulties. We’ll follow it step-by-step (you asked not to get everything at once — so this message is *only* the roadmap; after you confirm we’ll start **Phase 1** and I’ll give you the exact classes/functions/small pseudocode you’ll need).
 
 # Roadmap — high level (phases & deliverables)
 
@@ -146,18 +145,6 @@ Nice — this is a clear, achievable project. Below is a **complete roadmap** fo
 * **M4 (ship):** Phase 7 + 8 — tested app bundle.
 
 ---
-
-# What you’ll learn at each phase
-
-* Phase 1–2: game logic, testing, data structures, debugging.
-* Phase 3: search algorithms, heuristics, performance tuning.
-* Phase 4–5: rendering, event loops, UI/UX design for games.
-* Phase 6–8: concurrency, architecture, packaging for macOS.
-
----
-
-If that looks good, we’ll begin **Phase 1 (Core game model)** next. I’ll give you exactly the C++ classes, method names, method signatures, and small pseudocode snippets you need to implement (no full files). Say **“Start Phase 1”** when you’re ready and I’ll hand you the first concept to implement.
-
 
 
 
