@@ -193,6 +193,29 @@ pair<int,int> CountDisk(CellState board[BOARD_SIZE][BOARD_SIZE]) {
     return make_pair(black, white);
 }
 
+void UndoMove(CellState board[BOARD_SIZE][BOARD_SIZE], vector<History>& histories) {
+
+    // if there is no move to undo then a safeguard to not get error
+    if (histories.empty()) return;
+
+
+    const unsigned long last_index = histories.size() - 1;
+
+    const CellState opponent = GetOpponent(histories[last_index].player);
+    auto [row, col] = histories[last_index].move;
+    vector<Move> flipped = histories[last_index].flipped;
+
+    // setting the cell in which player played their move to empty
+    board[row][col] = CellState::Empty;
+
+    // undoing the disk flip
+    for (auto& [r, c] : flipped) {
+        board[r][c] = opponent;
+    }
+
+    histories.pop_back();
+}
+
 
 /* ---------------------------------------------------------------------------------------
                                         DISPLAY FUNCTION

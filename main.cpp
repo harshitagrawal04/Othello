@@ -40,17 +40,26 @@ int main() {
         // asker user for the move they want to make
         cout << "Player "
                      << (current_player == CellState::Black ? "Black" : "White")
-                     << " enter your move (row col): ";
+                     << " enter your move (row col) or (-1, -1) for undo: ";
         cin >> move.row >> move.col;
 
-        // checking if the entered move is legal or not
+        if (move.row == -1 && move.col == -1) {
+            if (!history.empty()) {
+                UndoMove(board, history);
+                current_player = GetOpponent(current_player);
+            }
+            else {
+                cout << "No moves to undo!" << endl;
+            }
+            continue;
+        }
 
-        // if it is legal then make the move and change the current_player
+        // checking if the entered move is legal or not if yes then make the move
         if (auto legal = legal_moves.find(move); legal != legal_moves.end()) {
             vector<Move> flips = GetFlipsMap(legal_moves, move);
             MakeMove(board, current_player, move, flips);
-            current_player = GetOpponent(current_player);
             history.push_back({current_player, move, flips});
+            current_player = GetOpponent(current_player);
         }
         // else print error message
         else {
@@ -72,7 +81,3 @@ int main() {
 }
 
 
-// datatype to store the history of the moves
-// undo function to undo the moves
-// function which update the history after the undo
-// stopper function which will stop undo and history going beyond initial stage

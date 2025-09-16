@@ -45,12 +45,12 @@ vector<Move> GetFlipsMap(const map<Move, vector<Move>>& moves, Move current_move
 
 // main function
 void ResetBoard(CellState board[BOARD_SIZE][BOARD_SIZE]);
-vector<Move> GetFlips(CellState board[BOARD_SIZE][BOARD_SIZE],
-                      Move move, CellState current_player);
+vector<Move> GetFlips(CellState board[BOARD_SIZE][BOARD_SIZE], Move move, CellState current_player);
 map<Move, vector<Move>> GetLegalMoves(CellState board[BOARD_SIZE][BOARD_SIZE], CellState current_player);
-void MakeMove(CellState board[BOARD_SIZE][BOARD_SIZE], CellState current_player,
-              Move move, const vector<Move>& flips);
+void MakeMove(CellState board[BOARD_SIZE][BOARD_SIZE], CellState current_player, Move move, const vector<Move>& flips);
 pair<int,int> CountDisk(CellState board[BOARD_SIZE][BOARD_SIZE]);
+void UndoMove(CellState board[BOARD_SIZE][BOARD_SIZE], vector<History>& histories);
+
 
 // display function
 void DisplayMoves(const map<Move, vector<Move>>& move);
