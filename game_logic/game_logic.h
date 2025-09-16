@@ -41,6 +41,8 @@ void DisplayCell(CellState cell);
 CellState GetOpponent(CellState current_player);
 vector<Move> GetKeys(const map<Move, vector<Move>>& moves);
 vector<Move> GetFlipsMap(const map<Move, vector<Move>>& moves, Move current_move);
+char IntToChar(int Int);
+int CharToInt(char ch);
 
 
 // main function

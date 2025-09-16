@@ -1,6 +1,7 @@
 #include <iostream>
 #include <map>
 #include <ranges>
+#include <cctype>
 #include "game_logic.h"
 
 
@@ -67,6 +68,20 @@ vector<Move> GetFlipsMap(const map<Move, vector<Move>>& moves, const Move curren
     return {};
 }
 
+// helper function to convert the row int to char for printing
+char IntToChar(int Int) {
+    return static_cast<char>(Int+65);
+}
+
+// helper function to convert the char to int
+int CharToInt(char ch) {
+    char lower_char = tolower(ch);
+
+    if (lower_char=='z') return -1;
+
+    lower_char -= 'a';
+    return lower_char;
+}
 
 
 /* ---------------------------------------------------------------------------------------
@@ -226,7 +241,7 @@ void UndoMove(CellState board[BOARD_SIZE][BOARD_SIZE], vector<History>& historie
 // display all the available moves for the current player
 void DisplayMoves(const map<Move, vector<Move>>& move) {
     for (vector<Move> moves = GetKeys(move); const auto&[row, col] : moves) {
-        cout << "{" << row << ", " << col << "}" << endl;
+        cout << "{" << IntToChar(row) << ", " << col << "}" << endl;
     }
 }
 
@@ -242,7 +257,8 @@ void DisplayBoard(CellState board[BOARD_SIZE][BOARD_SIZE]) {
 
     // displaying the row number
     for (int row = 0; row < BOARD_SIZE; row++) {
-        cout << row << " ";
+        // displaying alphabetic characters for the rows
+        cout << IntToChar(row) << " ";
         // displaying the cell
         for (int col = 0; col < BOARD_SIZE; col++) {
             DisplayCell(board[row][col]);
@@ -260,12 +276,12 @@ void DisplayHistory(const History& history) {
 
     // displaying the move made
     cout << "move made: ";
-    cout << "{" << history.move.row << ", " << history.move.col << "}" << endl;
+    cout << "{" << IntToChar(history.move.row) << ", " << history.move.col << "}" << endl;
 
     // displaying the disks flipped
     cout << "disks flipped: ";
-    for (auto& flip: history.flipped) {
-        cout << "{" << flip.row << ", " << flip.col << "}, ";
+    for (const auto&[row, col]: history.flipped) {
+        cout << "{" << IntToChar(row) << ", " << col << "}, ";
     }
     cout << endl;
 

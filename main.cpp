@@ -35,15 +35,15 @@ int main() {
         cout << "all possible legal moves" << endl;
         DisplayMoves(legal_moves);
 
-        Move move{};
+        char row; int col;
 
         // asker user for the move they want to make
         cout << "Player "
                      << (current_player == CellState::Black ? "Black" : "White")
-                     << " enter your move (row col) or (-1, -1) for undo: ";
-        cin >> move.row >> move.col;
+                     << " enter your move (row col) or u for undo: ";
+        cin >> row;
 
-        if (move.row == -1 && move.col == -1) {
+        if (row == 'u' || row == 'U') {
             if (!history.empty()) {
                 UndoMove(board, history);
                 current_player = GetOpponent(current_player);
@@ -53,6 +53,10 @@ int main() {
             }
             continue;
         }
+
+        cin >> col;
+
+        Move move = {CharToInt(row), col};
 
         // checking if the entered move is legal or not if yes then make the move
         if (auto legal = legal_moves.find(move); legal != legal_moves.end()) {
