@@ -1,7 +1,6 @@
 #ifndef MOVE_H
 #define MOVE_H
 
-#include <functional>  // for std::hash
 
 struct Move {
     int row;
@@ -27,7 +26,7 @@ namespace std {
     struct hash<Move> {
         size_t operator()(const Move& m) const noexcept {
             // Combine row and col into one hash value
-            return std::hash<int>()(m.row) ^ (std::hash<int>()(m.col) << 1);
+            return (m.row << 3) ^ m.col;
         }
     };
 }

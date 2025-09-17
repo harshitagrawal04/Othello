@@ -1,7 +1,7 @@
 #include <iostream>
 #include <unordered_map>
 #include <ranges>
-#include "GmaeEngine.h"
+#include "GameEngine.h"
 #include "Move.h"
 
 
@@ -49,26 +49,20 @@ CellState GameEngine::GetOpponent() {
     return opponent;
 }
 
-CellState GetOpponent(CellState player) {
-    CellState opponent = player == CellState::Black ?
-                     CellState::White : CellState::Black;
-    return opponent;
-}
-
 // helper function to get the list of all the key in the map
-vector<Move> GameEngine::GetKeys(const unordered_map<Move, vector<Move>>& moves) {
+vector<Move> GameEngine::GetKeys() {
     vector<Move> keys;
 
     // loop through the map and add move coordinates to the keys vector
-    for (const auto &key: moves | views::keys) {
+    for (const auto &key: move_map | views::keys) {
         keys.push_back(key);
     }
     return keys;
 }
 
 // helper function to get the flips for the move
-vector<Move> GameEngine::GetFlipsMap(const unordered_map<Move, vector<Move>>& moves, Move current_move) {
-    if (const auto flips = moves.find(current_move); flips != moves.end()) {
+vector<Move> GameEngine::GetFlipsMap(Move current_move) {
+    if (const auto flips = move_map.find(current_move); flips != move_map.end()) {
         return flips->second;
     }
     return {};
@@ -81,8 +75,7 @@ char GameEngine::IntToChar(int Int) {
 
 // helper function to convert the char to int
 int GameEngine::CharToInt(char ch) {
-    char lower_char = tolower(ch);
-    return lower_char - 'a';
+    return tolower(static_cast<unsigned char>(ch)) - 'a';
 }
 
 
@@ -90,11 +83,12 @@ int GameEngine::CharToInt(char ch) {
                                         CONSTRUCTURE
    ---------------------------------------------------------------------------------------  */
 
-//default construture
+//default construct
 GameEngine::GameEngine() {
     currentPlayer = CellState::Black;
     histories.clear();
     ResetBoard();
+    move_map = GetLegalMoves();
 }
 
 /* ---------------------------------------------------------------------------------------
@@ -105,17 +99,19 @@ GameEngine::GameEngine() {
 void GameEngine::ResetBoard() {
 
     // setting each cell to empty
-    for (int i = 0; i < BOARD_SIZE; i++) {
-        for (int j = 0; j < BOARD_SIZE; j++) {
-            board[i][j] = CellState::Empty;
+    // accessing a particular row of the board
+    for (auto & row : board) {
+        // accessing a particular cell of the row
+        for (auto & cell : row) {
+            cell = CellState::Empty;
         }
     }
 
     // setting the value of central four cell
-    board[3][3] = CellState::Black;
-    board[4][4] = CellState::Black;
-    board[3][4] = CellState::White;
-    board[4][3] = CellState::White;
+    board[3][3] = CellState::White;
+    board[4][4] = CellState::White;
+    board[3][4] = CellState::Black;
+    board[4][3] = CellState::Black;
 }
 
 // find if the particular move is legal or not and return all the disk that will flip
@@ -131,36 +127,33 @@ vector<Move> GameEngine::GetFlips(const Move move) {
 
     // checking all the direction
     for (auto& direction: DIRECTIONS) {
-        /* cout << "direction: " <<direction << endl; */
-        int newrow = move.row + direction[0];
-        int newcol = move.col + direction[1];
+        int row = move.row + direction[0];
+        int col = move.col + direction[1];
         vector<Move> temp;
 
         // checking if the new cell is in the board
-        if (InBoard(newrow, newcol)) {
+        if (InBoard(row, col)) {
             // checking if the immediate cell is of opponent
-            if (board[newrow][newcol] == opponent) {
-                temp.push_back(Move(newrow, newcol));
-                /*cout << "immediate cell " << newrow << "," << newcol << endl;*/
-                newrow += direction[0];
-                newcol += direction[1];
+            if (board[row][col] == opponent) {
+                temp.push_back(Move(row, col));
+                row += direction[0];
+                col += direction[1];
             }
             else continue; // if not then skip this direction
         }
         else continue; // if outside the board then skip this direction
 
         // while we are in the board and next cell is of opponent continue in the direction
-        while (InBoard(newrow, newcol) && board[newrow][newcol] == opponent) {
+        while (InBoard(row, col) && board[row][col] == opponent) {
             // if not then append the temp move and go forward in the same direction
-            temp.push_back(Move(newrow, newcol));
-            /*cout << "next cell " << newrow << "," << newcol << endl;*/
-            newrow += direction[0];
-            newcol += direction[1];
+            temp.push_back(Move(row, col));
+            row += direction[0];
+            col += direction[1];
         }
 
         // if we find current player disk in the direction then append all the disk to be changed to legal_move
-        if (InBoard(newrow, newcol) &&
-            board[newrow][newcol] == currentPlayer &&
+        if (InBoard(row, col) &&
+            board[row][col] == currentPlayer &&
             !temp.empty()) {
             for (auto& x : temp) {
                 flips.push_back(x);
@@ -183,47 +176,62 @@ unordered_map<Move, vector<Move>> GameEngine::GetLegalMoves() {
     return legal_moves;
 }
 
+// checking is enter move is legal or not
+bool GameEngine::IsValidMove(Move move) {
+    bool valid1 = InBoard(move.row, move.col);
+    bool valid2 = (move_map.find(move) != move_map.end());
+
+    cout << "Checking move: row=" << move.row << " col=" << move.col << endl;
+
+    if (!valid1) cout << "Move outside the board\n";
+    else if (!valid2) cout << "Illegal move\n";
+
+    return valid1 && valid2;
+}
+
 // make the move and change the disk accordingly
-void GameEngine::MakeMove(const Move move, const vector<Move>& flips) {
-
-    // checking if the move is inside the board or not
-    if (!InBoard(move.row, move.col)) {
-        cout << "Illegal move" << endl;
-    }
-
-    // set the cell on which player is making the move to their colour
-    board[move.row][move.col] = currentPlayer;
-
-    // flip the remaining disk
-    for (auto& [row, col] : flips) {
-        board[row][col] = currentPlayer;
-    }
+void GameEngine::MakeMove(int row, int col) {
 
     // updating the history
     History h;
     h.player = currentPlayer;
-    h.move = move;
-    h.flipped = flips;
+    h.move = {row, col};
+    h.flipped = GetFlipsMap({row, col});
 
-    for (int i = 0; i < BOARD_SIZE; ++i) {
-        for (int j = 0; j < BOARD_SIZE; ++j) {
-            h.board[i][j] = board[i][j];
+    for (int r = 0; r < BOARD_SIZE; ++r) {
+        for (int c = 0; c < BOARD_SIZE; ++c) {
+            h.board[r][c] = board[r][c];
         }
     }
 
     histories.push_back(h);
+
+    vector<Move> flips = GetFlips({row, col});
+
+    // set the cell on which player is making the move to their colour
+    board[row][col] = currentPlayer;
+
+    // flip the remaining disk
+    for (auto& [r, c] : flips) {
+        board[r][c] = currentPlayer;
+    }
+
+    currentPlayer = GetOpponent();
+    move_map = GetLegalMoves();
 }
 
 pair<int,int> GameEngine::CountDisk() {
     int black = 0;
     int white = 0;
 
-    for (int row = 0; row < BOARD_SIZE; row++) {
-        for (int col = 0; col < BOARD_SIZE; col++) {
-            if (board[row][col] == CellState::Black) {
+    // accessing a particular row of the board
+    for (const auto & row : board) {
+        // accessing a particular cell of the row
+        for (const auto cell : row) {
+            if (cell == CellState::Black) {
                 black++;
             }
-            else if (board[row][col] == CellState::White) {
+            else if (cell == CellState::White) {
                 white++;
             }
         }
@@ -240,19 +248,17 @@ void GameEngine::UndoMove() {
 
     const unsigned long last_index = histories.size() - 1;
 
-    const CellState opponent = GetOpponent(histories[last_index].player);
-    auto [row, col] = histories[last_index].move;
     vector<Move> flipped = histories[last_index].flipped;
 
-    // setting the cell in which player played their move to empty
-    board[row][col] = CellState::Empty;
-
-    // undoing the disk flip
-    for (auto& [r, c] : flipped) {
-        board[r][c] = opponent;
+    for (int r = 0; r < BOARD_SIZE; r++) {
+        for (int c = 0; c < BOARD_SIZE; c++) {
+            board[r][c] = histories[last_index].board[r][c];
+        }
     }
 
+    currentPlayer = histories[last_index].player;
     histories.pop_back();
+    move_map = GetLegalMoves();
 }
 
 
@@ -263,8 +269,10 @@ void GameEngine::UndoMove() {
 
 
 // display all the available moves for the current player
-void GameEngine::DisplayMoves(const unordered_map<Move, vector<Move>>& move) {
-    for (vector<Move> moves = GetKeys(move); const auto&[row, col] : moves) {
+void GameEngine::DisplayMoves() {
+    cout << "Displaying moves" << endl;
+    auto keys = GetKeys();
+    for (const auto& [row, col] : keys) {
         cout << "{" << IntToChar(row) << ", " << col << "}" << endl;
     }
 }

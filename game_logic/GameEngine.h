@@ -12,41 +12,45 @@ using namespace std;
 class GameEngine {
 private:
     // object variable
-    CellState board[BOARD_SIZE][BOARD_SIZE];
-    CellState currentPlayer;
+    CellState board[BOARD_SIZE][BOARD_SIZE] {};
     vector<History> histories;
 
 
     // helper function
     bool InBoard(int row, int col);
     void DisplayCell(CellState cell); // LATER MOVE IT TO DISPLAY
-    CellState GetOpponent();
-    CellState GetOpponent(CellState player);
-    vector<Move> GetKeys(const unordered_map<Move, vector<Move>>& moves); // LATER MOVE IT TO DISPLAY
-    vector<Move> GetFlipsMap(const unordered_map<Move, vector<Move>>& moves, Move current_move);
+    vector<Move> GetKeys(); // LATER MOVE IT TO DISPLAY
+    vector<Move> GetFlipsMap(Move current_move);
     char IntToChar(int Int); // LATER MOVE IT TO DISPLAY
-    int CharToInt(char ch); // LATER MOVE IT TO DISPLAY
 
     // main function
     void ResetBoard();
     vector<Move> GetFlips(Move move);
-    unordered_map<Move, vector<Move>> GetLegalMoves();
 
 
 public:
+    CellState currentPlayer;
+    unordered_map<Move, vector<Move>> move_map;
+
+    int CharToInt(char ch); // LATER MOVE IT TO DISPLAY
+
     // constructor
     GameEngine();
 
     // main function
-    void MakeMove(Move move, const vector<Move>& flips);
+    bool IsValidMove(Move move);
+    void MakeMove(int row, int col);
     pair<int,int> CountDisk();
     void UndoMove();
+    CellState GetOpponent();
+    unordered_map<Move, vector<Move>> GetLegalMoves();
+
 
 
     // LATER MOVE IT TO DISPLAY
 
     // display function
-    void DisplayMoves(const unordered_map<Move, vector<Move>>& move);
+    void DisplayMoves();
     void DisplayBoard();
     void DisplayHistory();
 };

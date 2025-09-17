@@ -5,8 +5,8 @@ set(CMAKE_CXX_STANDARD 20)
 
 add_executable(othello
         main.cpp
-        game_logic/GmaeEngine.cpp
-        game_logic/GmaeEngine.h
+        game_logic/GameEngine.cpp
+        game_logic/GameEngine.h
         ai_bot/AiEngine.cpp
         ai_bot/AiEngine.h
         game_logic/Move.h
