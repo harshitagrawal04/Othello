@@ -9,32 +9,47 @@
 using namespace std;
 
 
-
-// helper function
-bool InBoard(int row, int col);
-void DisplayCell(CellState cell);
-CellState GetOpponent(CellState current_player);
-vector<Move> GetKeys(const unordered_map<Move, vector<Move>>& moves);
-vector<Move> GetFlipsMap(const unordered_map<Move, vector<Move>>& moves, Move current_move);
-char IntToChar(int Int);
-int CharToInt(char ch);
+class GameEngine {
+private:
+    // object variable
+    CellState board[BOARD_SIZE][BOARD_SIZE];
+    CellState currentPlayer;
+    vector<History> histories;
 
 
-// main function
-void ResetBoard(CellState board[BOARD_SIZE][BOARD_SIZE]);
-vector<Move> GetFlips(CellState board[BOARD_SIZE][BOARD_SIZE], Move move, CellState current_player);
-unordered_map<Move, vector<Move>> GetLegalMoves(CellState board[BOARD_SIZE][BOARD_SIZE], CellState current_player);
-void MakeMove(CellState board[BOARD_SIZE][BOARD_SIZE], CellState current_player, Move move, const vector<Move>& flips);
-pair<int,int> CountDisk(CellState board[BOARD_SIZE][BOARD_SIZE]);
-void UndoMove(CellState board[BOARD_SIZE][BOARD_SIZE], vector<History>& histories);
+    // helper function
+    bool InBoard(int row, int col);
+    void DisplayCell(CellState cell); // LATER MOVE IT TO DISPLAY
+    CellState GetOpponent();
+    CellState GetOpponent(CellState player);
+    vector<Move> GetKeys(const unordered_map<Move, vector<Move>>& moves); // LATER MOVE IT TO DISPLAY
+    vector<Move> GetFlipsMap(const unordered_map<Move, vector<Move>>& moves, Move current_move);
+    char IntToChar(int Int); // LATER MOVE IT TO DISPLAY
+    int CharToInt(char ch); // LATER MOVE IT TO DISPLAY
+
+    // main function
+    void ResetBoard();
+    vector<Move> GetFlips(Move move);
+    unordered_map<Move, vector<Move>> GetLegalMoves();
 
 
-// display function
-void DisplayMoves(const unordered_map<Move, vector<Move>>& move);
-void DisplayBoard(CellState board[BOARD_SIZE][BOARD_SIZE]);
-void DisplayHistory(const History& history);
+public:
+    // constructor
+    GameEngine();
+
+    // main function
+    void MakeMove(Move move, const vector<Move>& flips);
+    pair<int,int> CountDisk();
+    void UndoMove();
 
 
+    // LATER MOVE IT TO DISPLAY
+
+    // display function
+    void DisplayMoves(const unordered_map<Move, vector<Move>>& move);
+    void DisplayBoard();
+    void DisplayHistory();
+};
 
 
 #endif //GAME_LOGIC_H

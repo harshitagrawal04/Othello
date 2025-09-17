@@ -5,6 +5,7 @@ using namespace std;
 
 /* --------------------------------------------------------------------------
       ADD LOGGING SYSTEM AND UNIT TEST
+      MAKE THE GAME ENGINE CLASS
    -------------------------------------------------------------------------- */
 
 void displayVector(const vector<Move> &move, const int size) {

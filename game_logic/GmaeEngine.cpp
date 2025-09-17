@@ -25,12 +25,12 @@ const int DIRECTIONS[8][2] = {
    ---------------------------------------------------------------------------------------  */
 
 // helper function to check if selected cell is inside the board or not
-bool InBoard(const int row, const int col) {
+bool GameEngine::InBoard(const int row, const int col) {
     return row >= 0 && row < BOARD_SIZE && col >= 0 && col < BOARD_SIZE;
 }
 
 // helper function to display the cell
-void DisplayCell(const CellState cell) {
+void GameEngine::DisplayCell(const CellState cell) {
     if (cell == CellState::Empty) {
         cout << ". ";
     }
@@ -43,14 +43,20 @@ void DisplayCell(const CellState cell) {
 }
 
 // helper function to find the opponent
-CellState GetOpponent(const CellState current_player) {
-    const CellState opponent = current_player == CellState::Black ?
+CellState GameEngine::GetOpponent() {
+    CellState opponent = currentPlayer == CellState::Black ?
                          CellState::White : CellState::Black;
     return opponent;
 }
 
+CellState GetOpponent(CellState player) {
+    CellState opponent = player == CellState::Black ?
+                     CellState::White : CellState::Black;
+    return opponent;
+}
+
 // helper function to get the list of all the key in the map
-vector<Move> GetKeys(const unordered_map<Move, vector<Move>>& moves) {
+vector<Move> GameEngine::GetKeys(const unordered_map<Move, vector<Move>>& moves) {
     vector<Move> keys;
 
     // loop through the map and add move coordinates to the keys vector
@@ -61,7 +67,7 @@ vector<Move> GetKeys(const unordered_map<Move, vector<Move>>& moves) {
 }
 
 // helper function to get the flips for the move
-vector<Move> GetFlipsMap(const unordered_map<Move, vector<Move>>& moves, const Move current_move) {
+vector<Move> GameEngine::GetFlipsMap(const unordered_map<Move, vector<Move>>& moves, Move current_move) {
     if (const auto flips = moves.find(current_move); flips != moves.end()) {
         return flips->second;
     }
@@ -69,23 +75,34 @@ vector<Move> GetFlipsMap(const unordered_map<Move, vector<Move>>& moves, const M
 }
 
 // helper function to convert the row int to char for printing
-char IntToChar(int Int) {
+char GameEngine::IntToChar(int Int) {
     return static_cast<char>(Int+65);
 }
 
 // helper function to convert the char to int
-int CharToInt(char ch) {
+int GameEngine::CharToInt(char ch) {
     char lower_char = tolower(ch);
     return lower_char - 'a';
 }
 
 
 /* ---------------------------------------------------------------------------------------
+                                        CONSTRUCTURE
+   ---------------------------------------------------------------------------------------  */
+
+//default construture
+GameEngine::GameEngine() {
+    currentPlayer = CellState::Black;
+    histories.clear();
+    ResetBoard();
+}
+
+/* ---------------------------------------------------------------------------------------
                                          MAIN FUNCTION
    ---------------------------------------------------------------------------------------  */
 
 // resetting the board to beginning stage of the game
-void ResetBoard(CellState board[BOARD_SIZE][BOARD_SIZE]) {
+void GameEngine::ResetBoard() {
 
     // setting each cell to empty
     for (int i = 0; i < BOARD_SIZE; i++) {
@@ -102,10 +119,9 @@ void ResetBoard(CellState board[BOARD_SIZE][BOARD_SIZE]) {
 }
 
 // find if the particular move is legal or not and return all the disk that will flip
-vector<Move> GetFlips(CellState board[BOARD_SIZE][BOARD_SIZE],
-                      const Move move, const CellState current_player) {
+vector<Move> GameEngine::GetFlips(const Move move) {
     vector<Move> flips;
-    const CellState opponent = GetOpponent(current_player);
+    const CellState opponent = GetOpponent();
 
 
     // checking if the cell is empty if not then return empty vector
@@ -144,7 +160,7 @@ vector<Move> GetFlips(CellState board[BOARD_SIZE][BOARD_SIZE],
 
         // if we find current player disk in the direction then append all the disk to be changed to legal_move
         if (InBoard(newrow, newcol) &&
-            board[newrow][newcol] == current_player &&
+            board[newrow][newcol] == currentPlayer &&
             !temp.empty()) {
             for (auto& x : temp) {
                 flips.push_back(x);
@@ -155,12 +171,11 @@ vector<Move> GetFlips(CellState board[BOARD_SIZE][BOARD_SIZE],
 }
 
 // get all the possible legal moves
-unordered_map<Move, vector<Move>> GetLegalMoves(CellState board[BOARD_SIZE][BOARD_SIZE],
-                                                const CellState current_player) {
+unordered_map<Move, vector<Move>> GameEngine::GetLegalMoves() {
     unordered_map<Move, vector<Move>> legal_moves;
     for (int row = 0; row < BOARD_SIZE; row++) {
         for (int col = 0; col < BOARD_SIZE; col++) {
-            if (vector<Move> flips = GetFlips(board, {row, col}, current_player); !flips.empty()) {
+            if (vector<Move> flips = GetFlips({row, col}); !flips.empty()) {
                 legal_moves[{row, col}] = flips;
             }
         }
@@ -169,8 +184,7 @@ unordered_map<Move, vector<Move>> GetLegalMoves(CellState board[BOARD_SIZE][BOAR
 }
 
 // make the move and change the disk accordingly
-void MakeMove(CellState board[BOARD_SIZE][BOARD_SIZE], const CellState current_player,
-              const Move move, const vector<Move>& flips) {
+void GameEngine::MakeMove(const Move move, const vector<Move>& flips) {
 
     // checking if the move is inside the board or not
     if (!InBoard(move.row, move.col)) {
@@ -178,15 +192,29 @@ void MakeMove(CellState board[BOARD_SIZE][BOARD_SIZE], const CellState current_p
     }
 
     // set the cell on which player is making the move to their colour
-    board[move.row][move.col] = current_player;
+    board[move.row][move.col] = currentPlayer;
 
     // flip the remaining disk
     for (auto& [row, col] : flips) {
-        board[row][col] = current_player;
+        board[row][col] = currentPlayer;
     }
+
+    // updating the history
+    History h;
+    h.player = currentPlayer;
+    h.move = move;
+    h.flipped = flips;
+
+    for (int i = 0; i < BOARD_SIZE; ++i) {
+        for (int j = 0; j < BOARD_SIZE; ++j) {
+            h.board[i][j] = board[i][j];
+        }
+    }
+
+    histories.push_back(h);
 }
 
-pair<int,int> CountDisk(CellState board[BOARD_SIZE][BOARD_SIZE]) {
+pair<int,int> GameEngine::CountDisk() {
     int black = 0;
     int white = 0;
 
@@ -204,7 +232,7 @@ pair<int,int> CountDisk(CellState board[BOARD_SIZE][BOARD_SIZE]) {
     return make_pair(black, white);
 }
 
-void UndoMove(CellState board[BOARD_SIZE][BOARD_SIZE], vector<History>& histories) {
+void GameEngine::UndoMove() {
 
     // if there is no move to undo then a safeguard to not get error
     if (histories.empty()) return;
@@ -235,14 +263,14 @@ void UndoMove(CellState board[BOARD_SIZE][BOARD_SIZE], vector<History>& historie
 
 
 // display all the available moves for the current player
-void DisplayMoves(const unordered_map<Move, vector<Move>>& move) {
+void GameEngine::DisplayMoves(const unordered_map<Move, vector<Move>>& move) {
     for (vector<Move> moves = GetKeys(move); const auto&[row, col] : moves) {
         cout << "{" << IntToChar(row) << ", " << col << "}" << endl;
     }
 }
 
 // display the board with row and column number
-void DisplayBoard(CellState board[BOARD_SIZE][BOARD_SIZE]) {
+void GameEngine::DisplayBoard() {
     cout << "  ";
 
     // print column number
@@ -264,21 +292,23 @@ void DisplayBoard(CellState board[BOARD_SIZE][BOARD_SIZE]) {
 }
 
 
-void DisplayHistory(const History& history) {
-    // displaying the player
-    cout << "player: ";
-    DisplayCell(history.player);
-    cout << endl;
+void GameEngine::DisplayHistory() {
+    // displaying the history
+    for (auto& history: histories) {
+        // displaying the player
+        cout << "player: ";
+        DisplayCell(history.player);
+        cout << endl;
 
-    // displaying the move made
-    cout << "move made: ";
-    cout << "{" << IntToChar(history.move.row) << ", " << history.move.col << "}" << endl;
+        // displaying the move made
+        cout << "move made: ";
+        cout << "{" << IntToChar(history.move.row) << ", " << history.move.col << "}" << endl;
 
-    // displaying the disks flipped
-    cout << "disks flipped: ";
-    for (const auto&[row, col]: history.flipped) {
-        cout << "{" << IntToChar(row) << ", " << col << "}, ";
+        // displaying the disks flipped
+        cout << "disks flipped: ";
+        for (const auto&[row, col]: history.flipped) {
+            cout << "{" << IntToChar(row) << ", " << col << "}, ";
+        }
+        cout << endl;
     }
-    cout << endl;
-
 }
