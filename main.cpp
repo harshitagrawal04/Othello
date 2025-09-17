@@ -1,6 +1,11 @@
 #include <iostream>
-#include "game_logic/game_logic.h"
+#include "game_logic/GmaeEngine.h"
+#include "game_logic/Move.h"
 using namespace std;
+
+/* --------------------------------------------------------------------------
+      ADD LOGGING SYSTEM AND UNIT TEST
+   -------------------------------------------------------------------------- */
 
 void displayVector(const vector<Move> &move, const int size) {
     for (int i = 0; i < size; i++) {
@@ -22,7 +27,7 @@ int main() {
         DisplayBoard(board);
 
         // get all the legal move
-        map<Move, vector<Move> > legal_moves = GetLegalMoves(board, current_player);
+        unordered_map<Move, vector<Move>> legal_moves = GetLegalMoves(board, current_player);
 
         // if there are no legal moves for the current player change the player
         if (legal_moves.empty()) {
@@ -60,14 +65,31 @@ int main() {
 
         // checking if the entered move is legal or not if yes then make the move
         if (auto legal = legal_moves.find(move); legal != legal_moves.end()) {
-            vector<Move> flips = GetFlipsMap(legal_moves, move);
-            MakeMove(board, current_player, move, flips);
-            history.push_back({current_player, move, flips});
-            current_player = GetOpponent(current_player);
+            if (InBoard(move.row, move.col)) {
+                vector<Move> flips = GetFlipsMap(legal_moves, move);
+                MakeMove(board, current_player, move, flips);
+
+                History h;
+                h.player = current_player;
+                h.move = move;
+                h.flipped = flips;
+
+                for (int i = 0; i < BOARD_SIZE; ++i) {
+                    for (int j = 0; j < BOARD_SIZE; ++j) {
+                        h.board[i][j] = board[i][j];
+                    }
+                }
+
+                history.push_back(h);
+                current_player = GetOpponent(current_player);
+            }
+            else {
+                cout << "invalid index" << endl;
+            }
         }
         // else print error message
         else {
-            cout << "not valid move" << endl;
+            cout << "invalid move" << endl;
         }
     }
 

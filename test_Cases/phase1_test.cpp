@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "../game_logic/game_logic.h"  // adjust include path
+#include "../game_logic/GmaeEngine.h"  // adjust include path
 #include <algorithm>
 
 // Helper: check if two Move vectors are equal (order doesn't matter)

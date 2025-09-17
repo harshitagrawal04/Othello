@@ -1,8 +1,8 @@
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include <ranges>
-#include <cctype>
-#include "game_logic.h"
+#include "GmaeEngine.h"
+#include "Move.h"
 
 
 using namespace std;
@@ -50,7 +50,7 @@ CellState GetOpponent(const CellState current_player) {
 }
 
 // helper function to get the list of all the key in the map
-vector<Move> GetKeys(const map<Move, vector<Move>>& moves) {
+vector<Move> GetKeys(const unordered_map<Move, vector<Move>>& moves) {
     vector<Move> keys;
 
     // loop through the map and add move coordinates to the keys vector
@@ -61,7 +61,7 @@ vector<Move> GetKeys(const map<Move, vector<Move>>& moves) {
 }
 
 // helper function to get the flips for the move
-vector<Move> GetFlipsMap(const map<Move, vector<Move>>& moves, const Move current_move) {
+vector<Move> GetFlipsMap(const unordered_map<Move, vector<Move>>& moves, const Move current_move) {
     if (const auto flips = moves.find(current_move); flips != moves.end()) {
         return flips->second;
     }
@@ -76,11 +76,7 @@ char IntToChar(int Int) {
 // helper function to convert the char to int
 int CharToInt(char ch) {
     char lower_char = tolower(ch);
-
-    if (lower_char=='z') return -1;
-
-    lower_char -= 'a';
-    return lower_char;
+    return lower_char - 'a';
 }
 
 
@@ -110,7 +106,6 @@ vector<Move> GetFlips(CellState board[BOARD_SIZE][BOARD_SIZE],
                       const Move move, const CellState current_player) {
     vector<Move> flips;
     const CellState opponent = GetOpponent(current_player);
-
 
 
     // checking if the cell is empty if not then return empty vector
@@ -160,8 +155,9 @@ vector<Move> GetFlips(CellState board[BOARD_SIZE][BOARD_SIZE],
 }
 
 // get all the possible legal moves
-map<Move, vector<Move>> GetLegalMoves(CellState board[BOARD_SIZE][BOARD_SIZE], const CellState current_player) {
-    map<Move, vector<Move>> legal_moves;
+unordered_map<Move, vector<Move>> GetLegalMoves(CellState board[BOARD_SIZE][BOARD_SIZE],
+                                                const CellState current_player) {
+    unordered_map<Move, vector<Move>> legal_moves;
     for (int row = 0; row < BOARD_SIZE; row++) {
         for (int col = 0; col < BOARD_SIZE; col++) {
             if (vector<Move> flips = GetFlips(board, {row, col}, current_player); !flips.empty()) {
@@ -239,7 +235,7 @@ void UndoMove(CellState board[BOARD_SIZE][BOARD_SIZE], vector<History>& historie
 
 
 // display all the available moves for the current player
-void DisplayMoves(const map<Move, vector<Move>>& move) {
+void DisplayMoves(const unordered_map<Move, vector<Move>>& move) {
     for (vector<Move> moves = GetKeys(move); const auto&[row, col] : moves) {
         cout << "{" << IntToChar(row) << ", " << col << "}" << endl;
     }
