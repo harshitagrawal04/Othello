@@ -8,32 +8,25 @@ using namespace std;
       MAKE THE GAME ENGINE CLASS
    -------------------------------------------------------------------------- */
 
-void displayVector(const vector<Move> &move, const int size) {
-    for (int i = 0; i < size; i++) {
-        cout << move[i].row << " " << move[i].col << " " << endl;
-    }
-}
 
-void displayPlayer(CellState player) {
-    if (player == CellState::Black) {
-        cout << "Black ";
-    }
-    else if (player == CellState::White) {
-        cout << "White ";
-    }
-}
 
-int main() {
+
+void PlayGame() {
     GameEngine gameEngine;
     while (true) {
+
+        // Display current state
         gameEngine.DisplayBoard();
         gameEngine.DisplayMoves();
+        gameEngine.DisplayPlayer();
 
-        char char_row; int col;
-        displayPlayer(gameEngine.currentPlayer);
+        // Take user input
+        char char_row;
+        int col;
         cout << "enter the move (row, col) or u for undo: ";
         cin >> char_row;
 
+        // handle undo
         if (char_row == 'u' || char_row == 'U') {
             gameEngine.UndoMove();
             continue;
@@ -42,29 +35,29 @@ int main() {
         cin >> col;
         int row = gameEngine.CharToInt(char_row);
 
-
+        // Validate and make move
         if (gameEngine.IsValidMove({row,col})) {
             gameEngine.MakeMove(row, col);
             cout << "move maked" << endl;
         }
 
-        if (gameEngine.move_map.empty()) {
-            gameEngine.currentPlayer = gameEngine.GetOpponent();
-            gameEngine.move_map = gameEngine.GetLegalMoves();
-            if (gameEngine.move_map.empty()) {
-                break;
-            }
+        // handle end game condition
+        if (gameEngine.GameEnd()) {
+            break;
         }
     }
 
+    // After game ends
     gameEngine.DisplayHistory();
-
     auto [black, white] = gameEngine.CountDisk();
+
     if (black >= white) cout << "Black wins" << endl;
     else if (white > black) cout << "White wins" << endl;
     else cout << "Draw" << endl;
-
-    return 0;
 }
 
 
+int main() {
+    PlayGame();
+    return 0;
+}

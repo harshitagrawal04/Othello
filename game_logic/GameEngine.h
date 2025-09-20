@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <unordered_map>
+#include <vector>
 #include "Move.h"
 #include "History.h"
 
@@ -11,48 +12,49 @@ using namespace std;
 
 class GameEngine {
 private:
-    // object variable
-    CellState board[BOARD_SIZE][BOARD_SIZE] {};
-    vector<History> histories;
+    // =================== VARIABLES ===================
+    CellState board[BOARD_SIZE][BOARD_SIZE] {}; // game board
+    vector<History> histories;                   // move history
+    unordered_map<Move, vector<Move>> move_map;  // legal moves map
+    CellState currentPlayer;                     // current player
 
 
-    // helper function
+    // =================== HELPER FUNCTIONS ===================
     bool InBoard(int row, int col);
-    void DisplayCell(CellState cell); // LATER MOVE IT TO DISPLAY
-    vector<Move> GetKeys(); // LATER MOVE IT TO DISPLAY
-    vector<Move> GetFlipsMap(Move current_move);
-    char IntToChar(int Int); // LATER MOVE IT TO DISPLAY
-
-    // main function
-    void ResetBoard();
     vector<Move> GetFlips(Move move);
+    vector<Move> GetFlipsMap(Move current_move);
+    CellState GetOpponent();
+
+    // board initialization
+    void ResetBoard();
+
+    // display helpers
+    void DisplayCell(CellState cell); // LATER MOVE IT TO DISPLAY
+    char IntToChar(int Int); // LATER MOVE IT TO DISPLAY
+    vector<Move> GetKeys(); // LATER MOVE IT TO DISPLAY
 
 
 public:
-    CellState currentPlayer;
-    unordered_map<Move, vector<Move>> move_map;
 
-    int CharToInt(char ch); // LATER MOVE IT TO DISPLAY
+    // =================== UTILITY FUNCTIONS ===================
+    int CharToInt(char ch);
 
-    // constructor
+    // =================== CONSTRUCTOR ===================
     GameEngine();
 
-    // main function
+    // =================== MAIN FUNCTIONS ===================
     bool IsValidMove(Move move);
     void MakeMove(int row, int col);
-    pair<int,int> CountDisk();
     void UndoMove();
-    CellState GetOpponent();
+    pair<int,int> CountDisk();
     unordered_map<Move, vector<Move>> GetLegalMoves();
+    bool GameEnd();
 
-
-
-    // LATER MOVE IT TO DISPLAY
-
-    // display function
-    void DisplayMoves();
-    void DisplayBoard();
-    void DisplayHistory();
+    // =================== DISPLAY FUNCTIONS ===================
+    void DisplayBoard(); // LATER MOVE IT TO DISPLAY
+    void DisplayMoves(); // LATER MOVE IT TO DISPLAY
+    void DisplayHistory(); // LATER MOVE IT TO DISPLAY
+    void DisplayPlayer(); // LATER MOVE IT TO DISPLAY
 };
 
 
