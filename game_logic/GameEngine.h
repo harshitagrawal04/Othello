@@ -31,7 +31,6 @@ private:
 
     // display helpers
     void DisplayCell(CellState cell); // LATER MOVE IT TO DISPLAY
-    char IntToChar(int Int); // LATER MOVE IT TO DISPLAY
     vector<Move> GetKeys(); // LATER MOVE IT TO DISPLAY
 
 
@@ -39,6 +38,7 @@ public:
 
     // =================== UTILITY FUNCTIONS ===================
     int CharToInt(char ch);
+    char IntToChar(int Int); // LATER MOVE IT TO DISPLAY
 
     // =================== CONSTRUCTOR ===================
     GameEngine();
@@ -56,7 +56,8 @@ public:
     vector<float> BoardToState();
     unordered_map<int, vector<int>> LegalMoveMapToStateMap();
     vector<int> StateMapIndices();
-    tuple<vector<float>, float, bool> Step(int actionIndex);
+    tuple<vector<float>, float, bool> Step(int actionIndex); // actor-critic
+    void UndoAI();
 
 
     // =================== DISPLAY FUNCTIONS ===================

@@ -2,8 +2,8 @@
 #ifndef AIENGINE_H
 #define AIENGINE_H
 
-#include "../game_logic/History.h"
-#include "../game_logic/GameEngine.h"
+#include "../../game_logic/History.h"
+#include "../../game_logic/GameEngine.h"
 
 class AIEngine {
 private:

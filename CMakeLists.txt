@@ -11,8 +11,11 @@ add_library(GameLogic
 
 # creating a library for the AI bot
 add_library(AiBot STATIC
-        ai_bot/AiEngine.cpp
-        ai_bot/AiEngine.h
+        ai_bot/advance/AiEngine.cpp
+        ai_bot/advance/AiEngine.h
+        ai_bot/basic/greedy.cpp
+        ai_bot/basic/greedy.h
+        ai_bot/ai.h
 )
 
 # creating a library for the UI

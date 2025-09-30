@@ -108,7 +108,7 @@ void GameEngine::Reset() {
     currentPlayer = CellState::Black;
     histories.clear();
     ResetBoard();
-    move_map = GetLegalMoves();         
+    move_map = GetLegalMoves();
 }
 
 // determine which disks would be flipped if a move is played
@@ -320,6 +320,11 @@ tuple<vector<float>, float, bool> GameEngine::Step(int actionIndex) {
 
     auto reward = static_cast<float>(flips.size());
     return {newState, reward, done};
+}
+
+void GameEngine::UndoAI() {
+    UndoMove();
+    UndoMove();
 }
 
 

@@ -1,185 +1,75 @@
-Perfect! That’s a **very ambitious but extremely educational approach** — building Actor-Critic from scratch in C++ without relying on libraries like PyTorch will teach you **exact neural network mechanics, gradient calculations, and RL fundamentals** deeply.
 
-Here’s a roadmap tailored for a **fully custom C++ Actor-Critic Othello AI**, while using only basic libraries for math/containers:
+## **Stage 1: Rule-based / Greedy AI (Baseline)**
 
----
+**Purpose:** Have a working AI that can play legally but is not smart. This helps you **test your environment, reward functions, and step mechanics**.
 
-## **Actor-Critic from Scratch Roadmap (C++)**
+* **Decision-making:**
 
-### **Stage 1: Environment Abstraction**
+    * Chooses a move randomly from legal moves
+    * Or picks the move that flips the most opponent discs (greedy)
 
-You already have `GameEngine`. Refactor it slightly for RL:
+* **Components to implement:**
 
-1. **State Representation**
+    * Legal move generator (already in `GameEngine`)
+    * Reward function (number of flipped discs, win/loss)
+    * Step function to apply moves and update state
 
-    * Convert the board into a numerical representation:
-
-        * 1 = Black
-        * -1 = White
-        * 0 = Empty
-    * Flatten 8×8 to 64-length vector (or leave as 2D array for CNN-like approaches later).
-
-2. **Action Space**
-
-    * Map moves to integers: 0–63.
-    * Provide a method to return legal moves (`vector<int>`).
-
-3. **Step Function**
-
-    * Apply a move and return:
-
-        * `next_state` (numerical board)
-        * `reward` (float)
-        * `done` (bool, whether game ended)
-
-4. **Reset Function**
-
-    * Resets board and returns initial state.
+* **Output:** Basic AI that plays valid Othello moves.
 
 ---
 
-### **Stage 2: Neural Network Implementation**
+## **Stage 2: Tabular / Value-based AI (Intermediate)**
 
-Since you’re building from scratch:
+**Purpose:** Introduce simple **state evaluation**. You’re not using neural networks yet, but the AI can start learning **which moves are better** over time.
 
-1. **Network Structure**
+* **Approach:**
 
-    * Actor: outputs probabilities over actions.
-    * Critic: outputs scalar value of state V(s).
+    * Maintain a **table of board states → value**
 
-2. **Layer Components**
+        * Can be simplified by encoding board as 64-length vector and storing only visited states
+    * Use **Critic-like updates**:
 
-    * Fully connected layers (FC)
-    * Activation functions: ReLU, Tanh, Softmax
-    * Forward pass
-    * Backward pass (manual gradient computation)
+        * After a move, update the value of the state using TD(0):
 
-3. **Parameter Storage**
+          ```text
+          V(s) = V(s) + alpha * (reward + gamma * V(s') - V(s))
+          ```
+    * Action selection: greedy or ε-greedy policy
 
-    * Use `std::vector<std::vector<float>>` for weights.
-    * Store biases separately.
+* **Components to implement:**
+
+    * State hashing / encoding
+    * Value table (map<state_vector, float>)
+    * TD update rule
+    * Policy (epsilon-greedy)
+
+* **Output:** AI that **improves over games** and can beat Stage 1 AI consistently.
 
 ---
 
-### **Stage 3: Forward and Backward Propagation**
+## **Stage 3: Actor-Critic Neural Network AI (Advanced / Full RL)**
 
-1. **Forward**
+**Purpose:** Full Actor-Critic RL implementation. The AI learns **both a policy (Actor)** and **a value function (Critic)** from scratch using neural networks.
 
-    * Actor outputs action probabilities via softmax.
-    * Critic outputs V(s).
+* **Approach:**
 
-2. **Backward**
-
-    * Actor: gradient of log(pi(a|s)) \* advantage
-    * Critic: gradient of (target - V(s))²
-
-3. **Weight Update**
-
-    * Implement **gradient descent**:
+    * Actor outputs action probabilities over all legal moves
+    * Critic outputs estimated value of current state
+    * Sample action according to Actor, apply move, receive reward, update both networks
+    * Use advantage for Actor update:
 
       ```text
-      w = w - lr * dw
+      advantage = reward + gamma * V(next_state) - V(current_state)
       ```
-    * Keep separate learning rates for actor and critic.
+    * Use MSE loss for Critic
 
----
+* **Components to implement:**
 
-### **Stage 4: Actor-Critic Algorithm**
+    * Neural network forward pass (Actor & Critic)
+    * Backward pass / manual gradient computation
+    * Weight & bias storage in files (for saving and loading models)
+    * Gradient descent updates
+    * Reward shaping and masking illegal moves
+    * Training loop (episodes & self-play)
 
-1. **Sample action**
-
-    * Mask illegal moves.
-    * Sample according to actor probabilities.
-
-2. **Take action**
-
-    * Use `GameEngine.Step(action)`.
-
-3. **Compute reward and advantage**
-
-   ```text
-   advantage = reward + gamma * V(next_state) - V(current_state)
-   ```
-
-4. **Update Actor and Critic**
-
-    * Actor: move probability gradient weighted by advantage.
-    * Critic: MSE loss between predicted V(s) and target.
-
-5. **Repeat until done**
-
-    * At the end of the game, reset environment.
-
----
-
-### **Stage 5: Training Loop**
-
-1. Loop over episodes:
-
-    * Reset game
-    * Play until game ends
-    * Collect trajectories
-    * Update networks after each move or at the end of episode
-
-2. Track performance:
-
-    * Win rate vs random AI
-    * Average reward
-    * Policy improvement
-
----
-
-### **Stage 6: Optimizations**
-
-* Entropy regularization → encourages exploration
-* Discount factor `gamma` tuning
-* Separate learning rates for actor and critic
-* Gradient clipping (to avoid exploding gradients)
-* Self-play: AI plays against its own policy for faster learning
-
----
-
-### **Stage 7: Testing and Evaluation**
-
-* Test policy against:
-
-    * Random AI
-    * Greedy AI
-* Log:
-
-    * Move distributions
-    * Rewards per game
-    * Actor loss and critic loss
-* Save and reload network parameters (serialize to file).
-
----
-
-### **Stage 8: C++ Specific Considerations**
-
-1. **Memory Management**
-
-    * Use `std::vector` for all matrices and states.
-    * Avoid raw pointers unless necessary.
-2. **Performance**
-
-    * Flatten 2D board for faster matrix multiplication.
-    * Pre-allocate all arrays to avoid repeated memory allocation.
-3. **Numerical Stability**
-
-    * Softmax: subtract max before exp
-    * Clamp gradients to prevent exploding values.
-
----
-
-💡 **Tip:** Start small:
-
-1. Implement a **tiny neural network** (64→16→64 for Actor, 64→16→1 for Critic).
-2. Verify forward/backward pass manually (simple test with known outputs).
-3. Implement the **step function in `GameEngine`** to interact with your network.
-4. Then start full Actor-Critic training loop.
-
----
-
-If you want, I can now draw a **diagram of the complete flow** showing how your **GameEngine, Actor, Critic, and training loop interact**, fully in C++. It will help you organize your classes and functions before coding.
-
-Do you want me to do that?
+* **Output:** AI that **learns strategy, can beat Stages 1 & 2**, and improves over time.
