@@ -1,6 +1,8 @@
 #ifndef MOVE_H
 #define MOVE_H
 
+#include <functional> // For std::hash
+
 
 struct Move {
     int row;

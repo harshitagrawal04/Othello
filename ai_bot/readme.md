@@ -1,322 +1,185 @@
-# Roadmap — Phase 3 (AI design & implementation), detailed & educational
+Perfect! That’s a **very ambitious but extremely educational approach** — building Actor-Critic from scratch in C++ without relying on libraries like PyTorch will teach you **exact neural network mechanics, gradient calculations, and RL fundamentals** deeply.
+
+Here’s a roadmap tailored for a **fully custom C++ Actor-Critic Othello AI**, while using only basic libraries for math/containers:
 
 ---
 
-## Phase 3.0 — Setup & API contract (very small)
+## **Actor-Critic from Scratch Roadmap (C++)**
 
-**Goal:** define the AI interface so the rest of the engine can call bots consistently.
+### **Stage 1: Environment Abstraction**
 
-### Tasks
+You already have `GameEngine`. Refactor it slightly for RL:
 
-* Design a minimal `AIEngine` interface:
+1. **State Representation**
 
-  ```cpp
-  enum class AIDifficulty { Easy, Medium, Hard };
+    * Convert the board into a numerical representation:
 
-  struct AIParams {
-    int max_depth;               // search depth
-    double randomness;           // 0..1 (for Easy/Medium)
-    vector<double> weights;      // heuristic weights (positional, mobility, etc.)
-  };
+        * 1 = Black
+        * -1 = White
+        * 0 = Empty
+    * Flatten 8×8 to 64-length vector (or leave as 2D array for CNN-like approaches later).
 
-  class AIEngine {
-  public:
-    AIEngine(AIDifficulty difficulty, const AIParams& params);
-    Move choose_move(const CellState board[BOARD_SIZE][BOARD_SIZE], CellState player);
-  private:
-    AIParams params_;
-    // any caches, transposition tables, rng, etc.
-  };
-  ```
+2. **Action Space**
 
-### Deliverable
+    * Map moves to integers: 0–63.
+    * Provide a method to return legal moves (`vector<int>`).
 
-* Header file with `AIEngine` class and method signatures implemented as stubs.
+3. **Step Function**
 
-### Why
+    * Apply a move and return:
 
-* Keeps UI/game loop stable while you iterate AI internals.
-* Forces you to think about parameters and persistence early.
+        * `next_state` (numerical board)
+        * `reward` (float)
+        * `done` (bool, whether game ended)
+
+4. **Reset Function**
+
+    * Resets board and returns initial state.
 
 ---
 
-## Phase 3.1 — Foundations: Trees, Minimax concept, and recursion
+### **Stage 2: Neural Network Implementation**
 
-**Goal:** understand game-tree search fundamentals before coding minimax.
+Since you’re building from scratch:
 
-### Learn
+1. **Network Structure**
 
-* What a game tree is: nodes = game states, edges = legal moves.
-* Turn-taking: maximizing player vs minimizing player.
-* Depth-limited search (why we limit depth).
-* Terminal states and utility (evaluation) functions.
+    * Actor: outputs probabilities over actions.
+    * Critic: outputs scalar value of state V(s).
 
-### Exercises (paper + code)
+2. **Layer Components**
 
-1. **Paper exercise:** draw a small tree for Tic-Tac-Toe up to depth 2 and manually apply minimax values.
-2. **Code exercise:** write a tiny recursive function (separate toy program) that generates all move sequences for depth N for a simplified 3×3 board (no heuristics). Just return number of leaf nodes. Verify branching counts.
+    * Fully connected layers (FC)
+    * Activation functions: ReLU, Tanh, Softmax
+    * Forward pass
+    * Backward pass (manual gradient computation)
 
-### Deliverable
+3. **Parameter Storage**
 
-* Short document or comments explaining minimax, plus the tiny test program that counts leaf nodes for small depth.
-
-### Why
-
-* If recursion/traversal isn’t clear it will be much harder once alpha-beta and move-ordering are introduced.
+    * Use `std::vector<std::vector<float>>` for weights.
+    * Store biases separately.
 
 ---
 
-## Phase 3.2 — Easy AI: Random (with optional weighting)
+### **Stage 3: Forward and Backward Propagation**
 
-**Goal:** implement a baseline bot you can play against immediately.
+1. **Forward**
 
-### Learn
+    * Actor outputs action probabilities via softmax.
+    * Critic outputs V(s).
 
-* Random selection, seeding RNG.
-* Simple heuristics (corner bias): corners are extremely valuable in Othello.
+2. **Backward**
 
-### Implement
+    * Actor: gradient of log(pi(a|s)) \* advantage
+    * Critic: gradient of (target - V(s))²
 
-* `Move choose_move_random(const unordered_map<Move, vector<Move>>& legal_moves, double randomness, rng)`
+3. **Weight Update**
 
-    * If `randomness==1.0` pick uniform random.
-    * If `randomness < 1.0` pick weighted: e.g., if corner present, with probability `p` pick corner; else random.
-* Hook into `AIEngine` for `AIDifficulty::Easy`.
+    * Implement **gradient descent**:
 
-### Small tests
-
-* Play several games vs random bot and count wins; check that with a corner bias the bot selects corners more often.
-
-### Deliverable
-
-* Working `Easy` mode in the game loop (play vs bot).
+      ```text
+      w = w - lr * dw
+      ```
+    * Keep separate learning rates for actor and critic.
 
 ---
 
-## Phase 3.3 — Heuristics design (essential for Minimax)
+### **Stage 4: Actor-Critic Algorithm**
 
-**Goal:** design the evaluation function — the heart of a shallow search.
+1. **Sample action**
 
-### Learn & Think
+    * Mask illegal moves.
+    * Sample according to actor probabilities.
 
-Design a heuristic consisting of combineable features:
+2. **Take action**
 
-1. **Piece difference:** `#my - #opp` (simple but noisy).
-2. **Mobility:** number of legal moves (current player mobility - opponent mobility).
-3. **Corner occupancy:** corners owned.
-4. **Corner closeness / X-squares risk:** penalty for squares adjacent to corner when corner empty.
-5. **Stability / frontier discs** (advanced): discs that cannot be flipped.
-6. **Positional weight matrix:** static weights per square (classic Othello weight table — corners +100, bad squares -50, edges +10, interior small values).
+    * Use `GameEngine.Step(action)`.
 
-### Implement
+3. **Compute reward and advantage**
 
-* Create `Evaluation` module:
-
-  ```cpp
-  double evaluate(const CellState board[BOARD_SIZE][BOARD_SIZE], CellState player, const vector<double>& weights);
-  ```
-
-    * `weights` map to features: e.g., `[w_piece_diff, w_mobility, w_corner, w_positional]`.
-    * Implement the features modularly so you can tune/test weights easily.
-
-### Exercises
-
-* Print evaluation values for several board positions, e.g., initial board, a hand-crafted midgame position, corner captured vs not.
-
-### Deliverable
-
-* `evaluate(...)` function fully documented, with a set of default weights (tweakable).
-
----
-
-## Phase 3.4 — Medium AI: Minimax (depth-limited) with static heuristic
-
-**Goal:** implement basic minimax recursion, alternate players, depth limit, and integrate `evaluate()`.
-
-### Learn
-
-* Minimax recursion pattern.
-* Depth-limited evaluation: when depth==0 or terminal state → call `evaluate()`.
-
-### Implement (step-by-step)
-
-1. **Pseudocode (to implement yourself):**
-
-   ```
-   function minimax(board, player, depth):
-       if depth == 0 or terminal(board):
-           return evaluate(board, player)
-       if player == maximizing_player:
-           best = -INF
-           for each move in legal_moves(board, player):
-               apply_move -> new_board
-               val = minimax(new_board, opponent(player), depth - 1)
-               best = max(best, val)
-           return best
-       else:
-           best = +INF
-           for move in legal_moves:
-               ...
-               best = min(best, val)
-           return best
+   ```text
+   advantage = reward + gamma * V(next_state) - V(current_state)
    ```
 
-2. Implement `minimax_value(board, player, depth, maximizing_player)` returning `(score, best_move)` or separate function to return best move.
+4. **Update Actor and Critic**
 
-3. Integrate into `AIEngine::choose_move` for `Medium` with shallow depth (e.g., depth = 3 or 4 plies). For Othello “ply” usually counts half-moves.
+    * Actor: move probability gradient weighted by advantage.
+    * Critic: MSE loss between predicted V(s) and target.
 
-### Tests / Sanity checks
+5. **Repeat until done**
 
-* Verify minimax returns the same move when trivial choices (single legal move).
-* Small search count test: instrument node visit counts to make sure recursion depth behaves as expected.
-
-### Deliverable
-
-* `Medium` bot that uses depth-limited minimax and your evaluation function.
-* Playable in CLI immediately.
+    * At the end of the game, reset environment.
 
 ---
 
-## Phase 3.5 — Optimization 1: Alpha-Beta pruning
+### **Stage 5: Training Loop**
 
-**Goal:** drastically reduce nodes searched by pruning.
+1. Loop over episodes:
 
-### Learn
+    * Reset game
+    * Play until game ends
+    * Collect trajectories
+    * Update networks after each move or at the end of episode
 
-* How alpha-beta maintains upper/lower bounds (alpha = best max so far, beta = best min so far).
-* Why move ordering matters for pruning effectiveness.
+2. Track performance:
 
-### Implement
-
-* Modify minimax to alpha-beta:
-
-  ```cpp
-  double alphabeta(board, depth, alpha, beta, maximizingPlayer)
-  ```
-* Ensure it still returns best move.
-
-### Exercise
-
-* Run a comparison: node visits with minimax vs alpha-beta for same depth and position. You should see fewer nodes with alpha-beta.
-
-### Deliverable
-
-* `Hard` bot uses alpha-beta at depth >= medium depth.
+    * Win rate vs random AI
+    * Average reward
+    * Policy improvement
 
 ---
 
-## Phase 3.6 — Optimization 2: Move ordering & iterative deepening
+### **Stage 6: Optimizations**
 
-**Goal:** build components to make deeper searches practical.
-
-### Learn
-
-* Move ordering heuristics (try moves likely to be best first). Examples:
-
-    * Order by heuristic evaluation of resulting state (shallow evaluate the child, sort descending).
-    * Prioritize capturing corners.
-* Iterative deepening: repeatedly run depth=1,2,3,... so you always have a best-move candidate if time runs out; also helps move-ordering (use best move from shallower depth to order next depth).
-* Time limit handling: how to abort search gracefully (use a `stop_time` flag checked in recursion).
-
-### Implement
-
-* Add `iterative_deepening()` wrapper:
-
-    * Loop `d = 1..max_depth`:
-
-        * run alpha-beta with time check
-        * save best move found
-* Add simple move ordering: for each child generate quick `evaluate()` and sort children by descending score before recursion.
-
-### Deliverable
-
-* Iterative deepening loop in `Hard` bot (optionally with a time limit parameter).
+* Entropy regularization → encourages exploration
+* Discount factor `gamma` tuning
+* Separate learning rates for actor and critic
+* Gradient clipping (to avoid exploding gradients)
+* Self-play: AI plays against its own policy for faster learning
 
 ---
 
-## Phase 3.7 — Transposition Table (Zobrist hashing) — optional but powerful
+### **Stage 7: Testing and Evaluation**
 
-**Goal:** cache evaluated positions to avoid re-evaluating identical board states reached via different move orders.
+* Test policy against:
 
-### Learn
+    * Random AI
+    * Greedy AI
+* Log:
 
-* What Zobrist hashing is: XOR-combination of random 64-bit numbers assigned to (square, piece).
-* Transposition table: `unordered_map<uint64_t, TTEntry>` storing depth, value, flag (exact/lowerbound/upperbound), best move.
-
-### Implement (advanced)
-
-1. Implement Zobrist table:
-
-    * `uint64_t zobrist[BOARD_SIZE][BOARD_SIZE][2]` (two piece types).
-    * Generate random 64-bit values at program start (use fixed seed for reproducibility).
-2. `uint64_t compute_hash(board)` using XOR of occupied squares and possibly side-to-move random.
-3. Add `unordered_map<uint64_t, TTEntry>` where `TTEntry` contains `(value, depth, flag, best_move)`.
-4. Before exploring a node check the table; after computing store result.
-5. Integrate with alpha-beta and iterative deepening.
-
-### Exercises
-
-* Measure speedup on mid-game positions.
-
-### Deliverable
-
-* Transposition table integrated and working, configurable through `AIParams`.
+    * Move distributions
+    * Rewards per game
+    * Actor loss and critic loss
+* Save and reload network parameters (serialize to file).
 
 ---
 
-## Phase 3.8 — Putting it together: AIEngine, difficulty parameters, and persistence
+### **Stage 8: C++ Specific Considerations**
 
-**Goal:** parameterize and persist learned/tuned weights and engine configuration.
+1. **Memory Management**
 
-### Tasks
+    * Use `std::vector` for all matrices and states.
+    * Avoid raw pointers unless necessary.
+2. **Performance**
 
-* `AIParams` should include:
+    * Flatten 2D board for faster matrix multiplication.
+    * Pre-allocate all arrays to avoid repeated memory allocation.
+3. **Numerical Stability**
 
-    * `max_depth`, `time_limit_ms`, `randomness`, `positional_weights[]`, `use_zobrist`, `use_iterative_deepening`, `use_tt`.
-* Implement functions to **serialize/deserialize** `AIParams` and positional weights to/from JSON or simple text:
-
-    * e.g., `save_ai_params("ai_easy.json")` and `load_ai_params("ai_hard.json")`.
-* Make `AIEngine` load weights at construction.
-
-### Deliverable
-
-* `AIEngine` config files and load/save functions so you can store tuning results and reuse them.
+    * Softmax: subtract max before exp
+    * Clamp gradients to prevent exploding values.
 
 ---
 
-## Phase 3.9 — Self-play testing and evaluation metrics
+💡 **Tip:** Start small:
 
-**Goal:** systematically check that difficulty levels behave differently and improve via tuning.
-
-### Experiments to run
-
-1. **Random vs Random** baseline test (100 games).
-2. **Easy vs Medium**, **Medium vs Hard** (100+ games each), track win/draw/loss stats.
-3. **ELO-like measurement** to see differences.
-4. **Ablation tests**: turn off mobility or corner in the heuristic and measure impact.
-
-### Metrics to record
-
-* Win percentage, average search nodes per move, average move time, distribution of depths reached (for iterative deepening).
-
-### Deliverable
-
-* Small script or program to run matches (AI vs AI) and log results to CSV. Use these results to tweak heuristic weights.
+1. Implement a **tiny neural network** (64→16→64 for Actor, 64→16→1 for Critic).
+2. Verify forward/backward pass manually (simple test with known outputs).
+3. Implement the **step function in `GameEngine`** to interact with your network.
+4. Then start full Actor-Critic training loop.
 
 ---
 
-## Phase 3.10 — Final polish for Phase 3
+If you want, I can now draw a **diagram of the complete flow** showing how your **GameEngine, Actor, Critic, and training loop interact**, fully in C++. It will help you organize your classes and functions before coding.
 
-**Goal:** integrate AI into game loop, ensure non-blocking UI and responsiveness.
-
-### Tasks
-
-* **CLI:** add a play-vs-bot command line option; let user choose difficulty.
-* **Non-blocking:** if moving to UI later, run AI on a background thread, passing a copy of board to AI.
-* **Safety:** limit AI time; if time exceeded, choose best move found so far (iterative deepening helps here).
-
-### Deliverable
-
-* A playable CLI where you can pick Easy / Medium / Hard and play against each. Optionally, background-threaded AI for later UI.
-
----
+Do you want me to do that?

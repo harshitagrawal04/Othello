@@ -1,6 +1,7 @@
 #include <iostream>
 #include <unordered_map>
 #include <ranges>
+#include <tuple>
 #include "GameEngine.h"
 #include "Move.h"
 
@@ -100,6 +101,14 @@ void GameEngine::ResetBoard() {
     board[4][4] = CellState::White;
     board[3][4] = CellState::Black;
     board[4][3] = CellState::Black;
+}
+
+// reset the game
+void GameEngine::Reset() {
+    currentPlayer = CellState::Black;
+    histories.clear();
+    ResetBoard();
+    move_map = GetLegalMoves();         
 }
 
 // determine which disks would be flipped if a move is played
@@ -249,6 +258,70 @@ bool GameEngine::GameEnd() {
     }
     return false;
 }
+
+/* ---------------------------------------------------------------------------------------
+                                        FUNCTION FOR AI
+   ---------------------------------------------------------------------------------------  */
+
+// converting the 2d board to 1d state for the AI
+vector<float> GameEngine::BoardToState() {
+    vector<float> state(BOARD_SIZE * BOARD_SIZE);
+
+    for (int row = 0; row < BOARD_SIZE; row++) {
+        for (int col = 0; col < BOARD_SIZE; col++) {
+            if (board[row][col] == CellState::Black)
+                state[row * BOARD_SIZE + col] = 1.0f;
+            else if (board[row][col] == CellState::White)
+                state[row * BOARD_SIZE + col] = -1.0f;
+            else if(board[row][col] == CellState::Empty)
+                state[row * BOARD_SIZE + col] = 0.0f;
+        }
+    }
+    return state;
+}
+
+// convert the legal moves map to int
+unordered_map<int, vector<int>> GameEngine::LegalMoveMapToStateMap() {
+    unordered_map<int, vector<int>> map;
+    for (const auto& pair: move_map) {
+        vector<int> temp;
+        Move key = pair.first;
+        vector<Move> value = pair.second;
+        for (const auto move: value) {
+            temp.push_back(move.row * BOARD_SIZE + move.col);
+        }
+        int temp_key = key.row * BOARD_SIZE + key.col;
+        map[temp_key] = temp;
+    }
+    return map;
+}
+
+// converts the legal moves to int
+vector<int> GameEngine::StateMapIndices() {
+    vector<int> keys;
+    vector<Move> MoveKeys = GetKeys();
+
+    for (const auto& key: MoveKeys) {
+        keys.push_back(key.row * BOARD_SIZE + key.col);
+    }
+    return keys;
+}
+
+// environment for the RL model
+tuple<vector<float>, float, bool> GameEngine::Step(int actionIndex) {
+    int row = actionIndex / BOARD_SIZE;
+    int col = actionIndex % BOARD_SIZE;
+
+    vector<Move> flips = GetFlips({row, col});
+    MakeMove(row, col);
+
+    vector<float> newState = BoardToState();
+    bool done = GameEnd();
+
+    auto reward = static_cast<float>(flips.size());
+    return {newState, reward, done};
+}
+
 
 /* ---------------------------------------------------------------------------------------
                                         DISPLAY FUNCTION

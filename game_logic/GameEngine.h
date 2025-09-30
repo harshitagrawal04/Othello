@@ -4,6 +4,7 @@
 #include <iostream>
 #include <unordered_map>
 #include <vector>
+#include <tuple>
 #include "Move.h"
 #include "History.h"
 
@@ -43,6 +44,7 @@ public:
     GameEngine();
 
     // =================== MAIN FUNCTIONS ===================
+    void Reset();
     bool IsValidMove(Move move);
     void MakeMove(int row, int col);
     void UndoMove();
@@ -50,11 +52,40 @@ public:
     unordered_map<Move, vector<Move>> GetLegalMoves();
     bool GameEnd();
 
+    // =================== FUNCTION FOR AI =====================
+    vector<float> BoardToState();
+    unordered_map<int, vector<int>> LegalMoveMapToStateMap();
+    vector<int> StateMapIndices();
+    tuple<vector<float>, float, bool> Step(int actionIndex);
+
+
     // =================== DISPLAY FUNCTIONS ===================
     void DisplayBoard(); // LATER MOVE IT TO DISPLAY
     void DisplayMoves(); // LATER MOVE IT TO DISPLAY
     void DisplayHistory(); // LATER MOVE IT TO DISPLAY
     void DisplayPlayer(); // LATER MOVE IT TO DISPLAY
+
+    // =================== GETTER FUNCTIONS ===================
+    const CellState (&GetBoard() const)[BOARD_SIZE][BOARD_SIZE] {
+        return board;
+    }
+    const vector<History>& GetHistories() const {
+        return histories;
+    }
+    const unordered_map<Move, vector<Move>>& GetLegalMovesMap() const {
+        return move_map;
+    }
+    CellState GetCurrentPlayer() const {
+        return currentPlayer;
+    }
+
+    /*
+     * GameEngine game;
+     * const auto& board = game.GetBoard();
+     * const auto& legalMoves = game.GetLegalMovesMap();
+     * const auto& history = game.GetHistories();
+     * CellState player = game.GetCurrentPlayer();
+     */
 };
 
 

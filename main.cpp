@@ -23,12 +23,16 @@ void PlayGame() {
         // Take user input
         char char_row;
         int col;
-        cout << "enter the move (row, col) or u for undo: ";
+        cout << "enter the move (row, col) or u for undo or r for reset: ";
         cin >> char_row;
 
         // handle undo
         if (char_row == 'u' || char_row == 'U') {
             gameEngine.UndoMove();
+            continue;
+        }
+        if (char_row == 'r' || char_row == 'R') {
+            gameEngine.Reset();
             continue;
         }
 
@@ -51,8 +55,8 @@ void PlayGame() {
     gameEngine.DisplayHistory();
     auto [black, white] = gameEngine.CountDisk();
 
-    if (black >= white) cout << "Black wins" << endl;
-    else if (white > black) cout << "White wins" << endl;
+    if (black >= white) cout << "Black wins: " << black << endl;
+    else if (white > black) cout << "White wins: " << white << endl;
     else cout << "Draw" << endl;
 }
 
