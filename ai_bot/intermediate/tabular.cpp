@@ -1,8 +1,10 @@
-#include "Greedy.h"
-#include "../../game_logic/GameEngine.h"
+//
+// Created by azurvane on 04/10/25.
+//
 
+#include "tabular.h"
 
-Move Greedy::SelectMove(GameEngine& engine) {
+Move Tabular::SelectMove(GameEngine& engine) {
     unordered_map<Move, vector<Move>> move_map = engine.GetLegalMoves();
     Move BestMove{};
     int max = 0;

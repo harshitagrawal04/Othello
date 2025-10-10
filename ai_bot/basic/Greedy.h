@@ -9,7 +9,6 @@
 class Greedy: public AI{
 public:
     Move SelectMove(GameEngine& engine) override;
-    // void PlayMove(GameEngine& engine);
 };
 
 

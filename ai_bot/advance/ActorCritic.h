@@ -4,14 +4,12 @@
 
 #include "../../game_logic/History.h"
 #include "../../game_logic/GameEngine.h"
+#include "../AI.h"
 
-class AIEngine {
-private:
-    GameEngine game;
-    vector<float> state = game.BoardToState();
 
+class ActorCritic : public AI{
 public:
-    AIEngine();
+    Move SelectMove(GameEngine& engine) override;
 };
 
 
