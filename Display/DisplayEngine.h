@@ -4,16 +4,13 @@
 
 #include <iostream>
 #include <SFML/Graphics.hpp>
-#include <SFML/Window.hpp>
 #include "../game_logic/GameEngine.h"
-#include "../game_logic/History.h"
-#include "../game_logic/Move.h"
 #include "../ai_bot/AI.h"
 
 using namespace std;
 
 #define WINDOW_HEIGHT 1024
-#define WINDOW_WIDTH 1024
+#define WINDOW_WIDTH 820
 
 enum class GameState {
     MainMenu,  // Home screen: select 1-player or 2-player

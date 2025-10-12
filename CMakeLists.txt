@@ -22,6 +22,7 @@ add_library(AiBot STATIC
         ai_bot/ai.h
         ai_bot/intermediate/tabular.cpp
         ai_bot/intermediate/tabular.h
+        ai_bot/SelectAIAgent.cpp
 )
 
 # creating a library for the UI

@@ -1,23 +1,6 @@
 #include "DisplayEngine.h"
 #include "../ai_bot/AI.h"
-#include "../ai_bot/basic/Greedy.h"
-#include "../ai_bot/advance/ActorCritic.h"
-#include "../ai_bot/intermediate/tabular.h"
-#include <memory>
-
-// helper function to get the agent to play against
-unique_ptr<AI> createAIAgent(const string& type) {
-    if (type == "basic") {
-        return make_unique<Greedy>();
-    }
-    if (type == "intermediate") {
-        return make_unique<Tabular>();
-    }
-    if (type == "advance") {
-        return make_unique<ActorCritic>();
-    }
-    return nullptr; // Return a null to play against friend
-}
+#include <string>
 
 DisplayEngine::DisplayEngine()
     : MainWindow(sf::VideoMode({WINDOW_WIDTH, WINDOW_HEIGHT}), "Othello - SFML 3 test"),
@@ -95,17 +78,12 @@ void DisplayEngine::HandleInput(const auto* mb) {
 
             if (gameEngine.GameEnd()) {
                 CurrentState = GameState::GameOver;
+                cout << "game end" << endl;
             }
         }
 
         else if (CurrentState == GameState::GameOver) {
             gameEngine.DisplayHistory();
-            auto [black, white] = gameEngine.CountDisk();
-
-            if (black >= white) cout << "Black wins: " << black << endl;
-            else if (white > black) cout << "White wins: " << white << endl;
-            else cout << "Draw" << endl;
-            throw runtime_error("game end");
         }
     }
 }
@@ -193,6 +171,36 @@ void DisplayEngine::Render() {
             y1 += CellSize;
             x1 = initial_x;
         }
+    }
+
+    else if (CurrentState == GameState::GameOver) {
+        auto [black, white] = gameEngine.CountDisk();
+
+        string text_display;
+        if (black >= white) text_display = "Black wins: " + to_string(black) + "\n";
+        else if (white > black) text_display = "White wins: " + to_string(white) + "\n";
+        else text_display = "Draw \n";
+
+        sf::Text text(font);
+        text.setCharacterSize(30); // size in pixels
+        text.setFillColor(sf::Color::White);
+        text.setOrigin({CellSize + 10, CellSize / 2.0f});
+
+        // printing the number of disk white have
+        text.setPosition({button_X, button_2P_Y});
+        text.setString("White: " + to_string(white) + "\n");
+        MainWindow.draw(text);
+
+        // printing the number of disk black have
+        text.setPosition({button_X, button_B_Y});
+        text.setString("Black: " + to_string(black) + "\n");
+        MainWindow.draw(text);
+
+        // print the wining colour
+        text.setCharacterSize(60); // size in pixels
+        text.setPosition({button_X, button_A_Y});
+        text.setString(text_display);
+        MainWindow.draw(text);
     }
 }
 

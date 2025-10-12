@@ -9,5 +9,6 @@ public:
     virtual Move SelectMove(GameEngine& engine) = 0;
 };
 
+unique_ptr<AI> createAIAgent(const string& type);
 
 #endif //AI_H
