@@ -8,6 +8,7 @@
 #include "../game_logic/GameEngine.h"
 #include "../game_logic/History.h"
 #include "../game_logic/Move.h"
+#include "../ai_bot/AI.h"
 
 using namespace std;
 
@@ -32,6 +33,7 @@ class DisplayEngine {
     int Row;
     int Col;
     sf::Font font;
+    unique_ptr<AI> agent;
 
     const float distance_button = CellSize / 4;
     const float button_X = WINDOW_WIDTH / 2.0f;

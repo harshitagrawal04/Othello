@@ -1,4 +1,23 @@
 #include "DisplayEngine.h"
+#include "../ai_bot/AI.h"
+#include "../ai_bot/basic/Greedy.h"
+#include "../ai_bot/advance/ActorCritic.h"
+#include "../ai_bot/intermediate/tabular.h"
+#include <memory>
+
+// helper function to get the agent to play against
+unique_ptr<AI> createAIAgent(const string& type) {
+    if (type == "basic") {
+        return make_unique<Greedy>();
+    }
+    if (type == "intermediate") {
+        return make_unique<Tabular>();
+    }
+    if (type == "advance") {
+        return make_unique<ActorCritic>();
+    }
+    return nullptr; // Return a null to play against friend
+}
 
 DisplayEngine::DisplayEngine()
     : MainWindow(sf::VideoMode({WINDOW_WIDTH, WINDOW_HEIGHT}), "Othello - SFML 3 test"),
@@ -23,36 +42,62 @@ void DisplayEngine::HandleInput(const auto* mb) {
 
         if (CurrentState == GameState::MainMenu) {
             if (Col >= button_X - CellSize && Col <= button_X + CellSize) {
+                // two player
                 if (Row <= button_2P_Y + CellSize/2.0f && Row >= button_2P_Y - CellSize/2.0f) {
                     CurrentState = GameState::InGame;
+                    agent = createAIAgent("");
+                    cout << "agent: human";
                 }
+                // basic bot
                 else if (Row <= button_B_Y + CellSize/2.0f && Row >= button_B_Y - CellSize/2.0f) {
                     CurrentState = GameState::InGame;
+                    agent = createAIAgent("basic");
+                    cout << "agent: basic";
                 }
+                // intermediate bot
                 else if (Row <= button_I_Y + CellSize/2.0f && Row >= button_I_Y - CellSize/2.0f) {
                     CurrentState = GameState::InGame;
+                    agent = createAIAgent("intermediate");
+                    cout << "agent: intermediate";
                 }
+                // advance bot
                 else if (Row <= button_A_Y + CellSize/2.0f && Row >= button_A_Y - CellSize/2.0f) {
                     CurrentState = GameState::InGame;
+                    agent = createAIAgent("advance");\
+                    cout << "agent: advance";
                 }
             }
-
         }
+
         else if (CurrentState == GameState::InGame) {
             Col = static_cast<int>(mb->position.x / CellSize);
             Row = static_cast<int>(mb->position.y / CellSize);
             cout << Row << " " << Col << endl;
 
-            // Validate and make move
-            if (gameEngine.IsValidMove({Row,Col})) {
-                gameEngine.MakeMove(Row, Col);
-                cout << "move maked" << endl;
+            CellState currentPlayer = gameEngine.GetCurrentPlayer();
+
+            if (currentPlayer == CellState::Black || agent == nullptr) {
+                // Validate and make move
+                if (gameEngine.IsValidMove({Row,Col})) {
+                    gameEngine.MakeMove(Row, Col);
+                    cout << "move maked" << endl;
+                }
+            }
+            else {
+                Move move = agent->SelectMove(gameEngine);
+
+                // Validate and make move
+                if (gameEngine.IsValidMove({move.row,move.col})) {
+                    gameEngine.MakeMove(move.row, move.col);
+                    cout << "move maked" << endl;
+                }
             }
 
             if (gameEngine.GameEnd()) {
                 CurrentState = GameState::GameOver;
             }
         }
+
         else if (CurrentState == GameState::GameOver) {
             gameEngine.DisplayHistory();
             auto [black, white] = gameEngine.CountDisk();
@@ -152,7 +197,6 @@ void DisplayEngine::Render() {
 }
 
 void DisplayEngine::run() {
-
     while (MainWindow.isOpen()) {
         while (const std::optional event = MainWindow.pollEvent()) {
             if (event->is<sf::Event::Closed>()) {
@@ -173,9 +217,7 @@ void DisplayEngine::run() {
         }
 
         MainWindow.clear(sf::Color(10, 20, 10));
-
         Render();
-
         MainWindow.display();
     }
 }
