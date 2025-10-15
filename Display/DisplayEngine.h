@@ -41,7 +41,8 @@ class DisplayEngine {
 
 public:
     DisplayEngine();
-    void HandleInput(const auto* mb);
+    void HandleMouseInput(const auto* mb);
+    void HandleKeyBoardInput(const auto* KeyPressed);
     void Render();
     void run();
 };

@@ -18,7 +18,7 @@ DisplayEngine::DisplayEngine()
 }
 
 
-void DisplayEngine::HandleInput(const auto* mb) {
+void DisplayEngine::HandleMouseInput(const auto* mb) {
     if (mb->button == sf::Mouse::Button::Left) {
         Col = mb->position.x;
         Row = mb->position.y;
@@ -84,6 +84,28 @@ void DisplayEngine::HandleInput(const auto* mb) {
 
         else if (CurrentState == GameState::GameOver) {
             gameEngine.DisplayHistory();
+        }
+    }
+}
+
+void DisplayEngine::HandleKeyBoardInput(const auto* KeyPressed) {
+    if (KeyPressed->scancode == sf::Keyboard::Scancode::Escape) {
+        MainWindow.close();
+    }
+    if (KeyPressed->scancode == sf::Keyboard::Scancode::R) {
+        gameEngine.Reset();
+        CurrentState = GameState::InGame;
+    }
+    if (KeyPressed->scancode == sf::Keyboard::Scancode::U) {
+        if (agent == nullptr) {
+            gameEngine.UndoMove();
+        }
+        else {
+            gameEngine.UndoAI();
+        }
+
+        if (CurrentState != GameState::InGame) {
+            CurrentState = GameState::InGame;
         }
     }
 }
@@ -211,12 +233,10 @@ void DisplayEngine::run() {
                 MainWindow.close();
             }
             if (const auto* KeyPressed = event->getIf<sf::Event::KeyPressed>()) {
-                if (KeyPressed->scancode == sf::Keyboard::Scancode::Escape) {
-                    MainWindow.close();
-                }
+                HandleKeyBoardInput(KeyPressed);
             }
             if (const auto* mb = event->getIf<sf::Event::MouseButtonPressed>()) {
-                HandleInput(mb);
+                HandleMouseInput(mb);
             }
             if (event->is<sf::Event::Resized>()) {
                 sf::View view(sf::FloatRect({0.f,0.f}, sf::Vector2f(MainWindow.getSize())));
