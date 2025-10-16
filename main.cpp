@@ -10,6 +10,7 @@ using namespace std;
 
 /* --------------------------------------------------------------------------
       ADD LOGGING SYSTEM AND UNIT TEST
+      ADD TABULAR AND ACTOR CRITIC AI BOT
    -------------------------------------------------------------------------- */
 
 

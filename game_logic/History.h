@@ -7,7 +7,6 @@
 using namespace std;
 
 
-
 constexpr int BOARD_SIZE = 8;
 
 enum class CellState {
@@ -15,7 +14,6 @@ enum class CellState {
     Black,
     White
 };
-
 
 struct History {
     CellState player;

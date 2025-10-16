@@ -14,7 +14,7 @@ using namespace std;
 class GameEngine {
 private:
     // =================== VARIABLES ===================
-    CellState board[BOARD_SIZE][BOARD_SIZE] {}; // game board
+    CellState board[BOARD_SIZE][BOARD_SIZE] {};  // game board
     vector<History> histories;                   // move history
     unordered_map<Move, vector<Move>> move_map;  // legal moves map
     CellState currentPlayer;                     // current player
@@ -31,14 +31,14 @@ private:
 
     // display helpers
     void DisplayCell(CellState cell); // LATER MOVE IT TO DISPLAY
-    vector<Move> GetKeys(); // LATER MOVE IT TO DISPLAY
 
 
 public:
 
     // =================== UTILITY FUNCTIONS ===================
-    int CharToInt(char ch);
+    int CharToInt(char ch); // LATER MOVE IT TO DISPLAY
     char IntToChar(int Int); // LATER MOVE IT TO DISPLAY
+    vector<Move> GetKeys(); // LATER MOVE IT TO DISPLAY
 
     // =================== CONSTRUCTOR ===================
     GameEngine();

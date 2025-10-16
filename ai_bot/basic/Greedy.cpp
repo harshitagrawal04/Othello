@@ -1,7 +1,7 @@
 #include "Greedy.h"
 #include "../../game_logic/GameEngine.h"
 
-
+// find a move which convert the maximum number of disk
 Move Greedy::SelectMove(GameEngine& engine) {
     unordered_map<Move, vector<Move>> move_map = engine.GetLegalMoves();
     Move BestMove{};
@@ -13,6 +13,5 @@ Move Greedy::SelectMove(GameEngine& engine) {
             max = flips.size();
         }
     }
-
     return BestMove;
 }
