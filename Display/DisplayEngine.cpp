@@ -56,12 +56,15 @@ void DisplayEngine::HandleMouseInput(const auto* mb) {
         }
 
         else if (CurrentState == GameState::InGame) {
+
+            // converting the mouse input to the coordinate of the board (8X8)
             Col = static_cast<int>(mb->position.x / CellSize);
             Row = static_cast<int>(mb->position.y / CellSize);
             cout << Row << " " << Col << endl;
 
             CellState currentPlayer = gameEngine.GetCurrentPlayer();
 
+            // move make by player
             if (currentPlayer == CellState::Black || agent == nullptr) {
                 // Validate and make move
                 if (gameEngine.IsValidMove({Row,Col})) {
@@ -69,7 +72,7 @@ void DisplayEngine::HandleMouseInput(const auto* mb) {
                     cout << "move maked" << endl;
                 }
             }
-            else {
+            else { // move make by ai
                 Move move = agent->SelectMove(gameEngine);
 
                 // Validate and make move
@@ -93,23 +96,19 @@ void DisplayEngine::HandleMouseInput(const auto* mb) {
 }
 
 void DisplayEngine::HandleKeyBoardInput(const auto* KeyPressed) {
-    if (KeyPressed->scancode == sf::Keyboard::Scancode::Escape) {
-        MainWindow.close();
-    }
     if (KeyPressed->scancode == sf::Keyboard::Scancode::R) {
         gameEngine.Reset();
         CurrentState = GameState::InGame;
     }
     if (KeyPressed->scancode == sf::Keyboard::Scancode::U) {
-        if (agent == nullptr) {
-            gameEngine.UndoMove();
-        }
-        else {
-            gameEngine.UndoAI();
-        }
-
-        if (CurrentState != GameState::InGame) {
-            CurrentState = GameState::InGame;
+        // player can only undo if the game is going on
+        if (CurrentState == GameState::InGame) {
+            if (agent == nullptr) {
+                gameEngine.UndoMove();
+            }
+            else {
+                gameEngine.UndoAI();
+            }
         }
     }
 }
@@ -186,9 +185,12 @@ void DisplayEngine::Render() {
 
         for (int i = 0; i < BOARD_SIZE; i++) {
             for (int j = 0; j < BOARD_SIZE; j++) {
+
+                // drawing the cell
                 cell.setPosition({x1, y1});
                 MainWindow.draw(cell);
 
+                // setting the coordinates for the disk to be drawn
                 float PositionX = x1 + (CellSize - (DiskRadius * 2))/2;
                 float PositionY = y1 + (CellSize - (DiskRadius * 2))/2;
 
@@ -206,8 +208,8 @@ void DisplayEngine::Render() {
 
                 // drawing the possible move player can make
                 else {
-                    for (const auto key: keys) {
-                        if (key.row == i && key.col == j) {
+                    for (const auto [row, col]: keys) {
+                        if (row == i && col == j) {
                             disk.setFillColor(sf::Color(128, 128, 128));
                             disk.setPosition({PositionX, PositionY});
                             MainWindow.draw(disk);
