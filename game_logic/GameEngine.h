@@ -36,9 +36,9 @@ private:
 public:
 
     // =================== UTILITY FUNCTIONS ===================
-    int CharToInt(char ch); // LATER MOVE IT TO DISPLAY
+    int CharToInt(char ch);  // LATER MOVE IT TO DISPLAY
     char IntToChar(int Int); // LATER MOVE IT TO DISPLAY
-    vector<Move> GetKeys(); // LATER MOVE IT TO DISPLAY
+    vector<Move> GetKeys();  // LATER MOVE IT TO DISPLAY
 
     // =================== CONSTRUCTOR ===================
     GameEngine();

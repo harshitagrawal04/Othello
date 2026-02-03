@@ -20,9 +20,9 @@ add_library(AiBot STATIC
         ai_bot/basic/greedy.cpp
         ai_bot/basic/greedy.h
         ai_bot/ai.h
-        ai_bot/intermediate/tabular.cpp
-        ai_bot/intermediate/tabular.h
         ai_bot/SelectAIAgent.cpp
+        ai_bot/intermediate/MinimaxHeuristicEval.cpp
+        ai_bot/intermediate/MinimaxHeuristicEval.h
 )
 
 # creating a library for the UI

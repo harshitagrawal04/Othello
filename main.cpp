@@ -4,7 +4,7 @@
 #include "ai_bot/AI.h"
 #include "ai_bot/basic/Greedy.h"
 #include "ai_bot/advance/ActorCritic.h"
-#include "ai_bot/intermediate/tabular.h"
+#include "ai_bot/intermediate/MinimaxHeuristicEval.h"
 #include "Display/DisplayEngine.h"
 using namespace std;
 

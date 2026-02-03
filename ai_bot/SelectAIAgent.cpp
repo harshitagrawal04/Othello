@@ -3,7 +3,7 @@
 #include "AI.h"
 #include "../ai_bot/basic/Greedy.h"
 #include "../ai_bot/advance/ActorCritic.h"
-#include "../ai_bot/intermediate/tabular.h"
+#include "../ai_bot/intermediate/MinimaxHeuristicEval.h"
 
 // helper function to get the agent to play against
 unique_ptr<AI> createAIAgent(const string& type) {
@@ -11,7 +11,7 @@ unique_ptr<AI> createAIAgent(const string& type) {
         return make_unique<Greedy>();
     }
     if (type == "intermediate") {
-        return make_unique<Tabular>();
+        return make_unique<MinimaxHeuristicEval>();
     }
     if (type == "advance") {
         return make_unique<ActorCritic>();

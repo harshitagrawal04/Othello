@@ -1,10 +1,8 @@
-//
-// Created by azurvane on 04/10/25.
-//
+#include "MinimaxHeuristicEval.h"
 
-#include "tabular.h"
 
-Move Tabular::SelectMove(GameEngine& engine) {
+// find a move which convert the maximum number of disk
+Move MinimaxHeuristicEval::SelectMove(GameEngine& engine) {
     unordered_map<Move, vector<Move>> move_map = engine.GetLegalMoves();
     Move BestMove{};
     int max = 0;
@@ -15,6 +13,5 @@ Move Tabular::SelectMove(GameEngine& engine) {
             max = flips.size();
         }
     }
-
     return BestMove;
 }
