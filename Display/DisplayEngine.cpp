@@ -13,7 +13,7 @@ DisplayEngine::DisplayEngine()
       Col(0)
 {
     // loading the font
-    if (!font.openFromFile("/Users/apple/Documents/programing/projects/othello/assists/fonts/Brush_Script.ttf")) {
+    if (!font.openFromFile("assists/fonts/Kaushan_Script/KaushanScript-Regular.ttf")) {
         cerr << "font not found" << endl;
     }
 }

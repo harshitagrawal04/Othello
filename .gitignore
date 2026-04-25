@@ -1,2 +1,5 @@
 notes.md
 lib/
+build/
+cmake-build-debug/
+.DS_Store
