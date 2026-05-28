@@ -86,16 +86,16 @@ vector<Move> GameEngine::GetFlipsMap(Move current_move) {
     return {};
 }
 
-/* ---------------------------------------------------------------------------------------
-                                   PUBLIC HELPER FUNCTION
-   ---------------------------------------------------------------------------------------  */
-
 // return the opponent of the current player
-CellState GameEngine::GetOpponentPlayer() {
+CellState GameEngine::GetOpponent() {
     CellState opponent = currentPlayer == CellState::Black ?
                          CellState::White : CellState::Black;
     return opponent;
 }
+
+/* ---------------------------------------------------------------------------------------
+                                   PUBLIC HELPER FUNCTION
+   ---------------------------------------------------------------------------------------  */
 
 pair<int,int> GameEngine::CountLegalMove() {
     int legal_moves_self = 0;
@@ -116,7 +116,7 @@ pair<int,int> GameEngine::CountLegalMove() {
     for (int row = 0; row < BOARD_SIZE; row++) {
         for (int col = 0; col < BOARD_SIZE; col++) {
             // get flips for this move
-            if (vector<Move> flips = GetFlips({row, col}, GetOpponentPlayer()); !flips.empty()) {
+            if (vector<Move> flips = GetFlips({row, col}, GetOpponent()); !flips.empty()) {
                 legal_moves_opponent++; // store valid moves
             }
         }
@@ -249,7 +249,7 @@ void GameEngine::MakeMove(int row, int col) {
         board[r][c] = currentPlayer;
     }
 
-    currentPlayer = GetOpponentPlayer();      // switch turn
+    currentPlayer = GetOpponent();      // switch turn
     move_map = GetLegalMoves();         // update legal moves
 }
 
@@ -290,7 +290,7 @@ pair<int,int> GameEngine::CountDisk() {
 // check if game has ended (no legal moves for both players)
 bool GameEngine::GameEnd() {
     if (move_map.empty()) {                  // current player has no moves
-        currentPlayer = GetOpponentPlayer();      // switch player
+        currentPlayer = GetOpponent();      // switch player
         move_map = GetLegalMoves();
         if (move_map.empty()) {             // opponent also has no moves
             return true;                    // game over
