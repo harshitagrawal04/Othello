@@ -8,7 +8,7 @@
 
 class Greedy: public AI{
 public:
-    Move SelectMove(GameEngine& engine) override;
+    Move SelectMove(GameEngine& engine, CellState BotColor) override;
 };
 
 

@@ -30,6 +30,54 @@ bool GameEngine::InBoard(const int row, const int col) {
     return row >= 0 && row < BOARD_SIZE && col >= 0 && col < BOARD_SIZE;
 }
 
+vector<Move> GameEngine::GetFlips(Move move) {
+    return GetFlips(move, GetCurrentPlayer());
+}
+
+// determine which disks would be flipped if a move is played
+vector<Move> GameEngine::GetFlips(Move move, CellState player) {
+    vector<Move> flips;
+    CellState opponent = player == CellState::Black ?
+                           CellState::White : CellState::Black;
+
+    // skip if cell is already occupied
+    if (board[move.row][move.col] != CellState::Empty) {
+        return flips;
+    }
+
+    // check all 8 directions from the move
+    for (auto& direction: DIRECTIONS) {
+        int row = move.row + direction[0];
+        int col = move.col + direction[1];
+        vector<Move> temp; // store flips in current direction
+
+        // first cell in this direction must belong to opponent
+        if (InBoard(row, col)) {
+            if (board[row][col] == opponent) {
+                temp.push_back(Move(row, col));
+                row += direction[0];
+                col += direction[1];
+            } else continue; // skip this direction if first cell not opponent
+        } else continue; // skip if out of board
+
+        // continue in this direction while opponent disks are found
+        while (InBoard(row, col) && board[row][col] == opponent) {
+            temp.push_back(Move(row, col));
+            row += direction[0];
+            col += direction[1];
+        }
+
+        // if a current player disk is found after opponent disks, flips are valid
+        if (board[row][col] == player &&
+            InBoard(row, col) && !temp.empty()) {
+            for (auto& x : temp) {
+                flips.push_back(x);
+            }
+            }
+    }
+    return flips;
+}
+
 // get the flips associated with a move from move_map, return empty vector if move not found
 vector<Move> GameEngine::GetFlipsMap(Move current_move) {
     if (const auto flips = move_map.find(current_move); flips != move_map.end()) {
@@ -38,12 +86,51 @@ vector<Move> GameEngine::GetFlipsMap(Move current_move) {
     return {};
 }
 
+/* ---------------------------------------------------------------------------------------
+                                   PUBLIC HELPER FUNCTION
+   ---------------------------------------------------------------------------------------  */
+
 // return the opponent of the current player
-CellState GameEngine::GetOpponent() {
+CellState GameEngine::GetOpponentPlayer() {
     CellState opponent = currentPlayer == CellState::Black ?
                          CellState::White : CellState::Black;
     return opponent;
 }
+
+pair<int,int> GameEngine::CountLegalMove() {
+    int legal_moves_self = 0;
+
+    // check each cell on the board
+    for (int row = 0; row < BOARD_SIZE; row++) {
+        for (int col = 0; col < BOARD_SIZE; col++) {
+            // get flips for this move
+            if (vector<Move> flips = GetFlips({row, col}); !flips.empty()) {
+                legal_moves_self++; // store valid moves
+            }
+        }
+    }
+
+    int legal_moves_opponent = 0;
+
+    // check each cell on the board
+    for (int row = 0; row < BOARD_SIZE; row++) {
+        for (int col = 0; col < BOARD_SIZE; col++) {
+            // get flips for this move
+            if (vector<Move> flips = GetFlips({row, col}, GetOpponentPlayer()); !flips.empty()) {
+                legal_moves_opponent++; // store valid moves
+            }
+        }
+    }
+
+    // first number is for black second is white
+    if (currentPlayer == CellState::Black)
+        return make_pair(legal_moves_self, legal_moves_opponent);
+    return make_pair(legal_moves_opponent, legal_moves_self);
+}
+
+/* ---------------------------------------------------------------------------------------
+                                     UTILITY FUNCTIONS
+   ---------------------------------------------------------------------------------------  */
 
 // convert row index (int) to character for display (0 -> 'A', 1 -> 'B', etc.)
 char GameEngine::IntToChar(int Int) {
@@ -65,10 +152,6 @@ vector<Move> GameEngine::GetKeys() {
     }
     return keys;
 }
-
-
-
-
 
 /* ---------------------------------------------------------------------------------------
                                         CONSTRUCTURE
@@ -109,49 +192,6 @@ void GameEngine::Reset() {
     histories.clear();
     ResetBoard();
     move_map = GetLegalMoves();
-}
-
-// determine which disks would be flipped if a move is played
-vector<Move> GameEngine::GetFlips(const Move move) {
-    vector<Move> flips;
-    const CellState opponent = GetOpponent();
-
-    // skip if cell is already occupied
-    if (board[move.row][move.col] != CellState::Empty) {
-        return flips;
-    }
-
-    // check all 8 directions from the move
-    for (auto& direction: DIRECTIONS) {
-        int row = move.row + direction[0];
-        int col = move.col + direction[1];
-        vector<Move> temp; // store flips in current direction
-
-        // first cell in this direction must belong to opponent
-        if (InBoard(row, col)) {
-            if (board[row][col] == opponent) {
-                temp.push_back(Move(row, col));
-                row += direction[0];
-                col += direction[1];
-            } else continue; // skip this direction if first cell not opponent
-        } else continue; // skip if out of board
-
-        // continue in this direction while opponent disks are found
-        while (InBoard(row, col) && board[row][col] == opponent) {
-            temp.push_back(Move(row, col));
-            row += direction[0];
-            col += direction[1];
-        }
-
-        // if a current player disk is found after opponent disks, flips are valid
-        if (board[row][col] == currentPlayer &&
-            InBoard(row, col) && !temp.empty()) {
-            for (auto& x : temp) {
-                flips.push_back(x);
-            }
-        }
-    }
-    return flips;
 }
 
 // compute all legal moves for the current player
@@ -209,7 +249,7 @@ void GameEngine::MakeMove(int row, int col) {
         board[r][c] = currentPlayer;
     }
 
-    currentPlayer = GetOpponent();      // switch turn
+    currentPlayer = GetOpponentPlayer();      // switch turn
     move_map = GetLegalMoves();         // update legal moves
 }
 
@@ -250,7 +290,7 @@ pair<int,int> GameEngine::CountDisk() {
 // check if game has ended (no legal moves for both players)
 bool GameEngine::GameEnd() {
     if (move_map.empty()) {                  // current player has no moves
-        currentPlayer = GetOpponent();      // switch player
+        currentPlayer = GetOpponentPlayer();      // switch player
         move_map = GetLegalMoves();
         if (move_map.empty()) {             // opponent also has no moves
             return true;                    // game over

@@ -23,8 +23,8 @@ private:
     // =================== HELPER FUNCTIONS ===================
     bool InBoard(int row, int col);
     vector<Move> GetFlips(Move move);
+    vector<Move> GetFlips(Move move, CellState opponent);
     vector<Move> GetFlipsMap(Move current_move);
-    CellState GetOpponent();
 
     // board initialization
     void ResetBoard();
@@ -34,6 +34,10 @@ private:
 
 
 public:
+
+    // ================= PUBLIC HELPER FUNCTION =================
+    CellState GetOpponentPlayer();
+    pair<int,int> CountLegalMove();
 
     // =================== UTILITY FUNCTIONS ===================
     int CharToInt(char ch);  // LATER MOVE IT TO DISPLAY

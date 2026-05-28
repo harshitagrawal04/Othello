@@ -41,8 +41,8 @@ class DisplayEngine {
 
 public:
     DisplayEngine();
-    void HandleMouseInput(const auto* mb);
-    void HandleKeyBoardInput(const auto* KeyPressed);
+    void HandleMouseInput(const sf::Event::MouseButtonPressed* mb);
+    void HandleKeyBoardInput(const sf::Event::KeyPressed* keyPressed);
     void Render();
     void run();
 };

@@ -1,8 +1,8 @@
-#include "ActorCritic.h"
+#include "HeuristicMinimaxAlphabeta.h"
 
 
 
-Move ActorCritic::SelectMove(GameEngine& engine) {
+Move HeuristicMinimaxAlphabeta::SelectMove(GameEngine& engine, CellState BotColor) {
     unordered_map<Move, vector<Move>> move_map = engine.GetLegalMoves();
     Move BestMove{};
     int max = 0;

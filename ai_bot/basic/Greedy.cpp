@@ -2,7 +2,7 @@
 #include "../../game_logic/GameEngine.h"
 
 // find a move which convert the maximum number of disk
-Move Greedy::SelectMove(GameEngine& engine) {
+Move Greedy::SelectMove(GameEngine& engine, CellState BotColor) {
     unordered_map<Move, vector<Move>> move_map = engine.GetLegalMoves();
     Move BestMove{};
     int max = 0;

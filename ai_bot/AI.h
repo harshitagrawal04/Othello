@@ -6,7 +6,7 @@
 class AI {
 public:
     virtual ~AI() = default;
-    virtual Move SelectMove(GameEngine& engine) = 0;
+    virtual Move SelectMove(GameEngine& engine, CellState BotColor) = 0;
 };
 
 // helper function to get the agent to play against

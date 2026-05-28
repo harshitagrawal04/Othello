@@ -7,9 +7,9 @@
 #include "../AI.h"
 
 
-class ActorCritic : public AI{
+class HeuristicMinimaxAlphabeta : public AI{
 public:
-    Move SelectMove(GameEngine& engine) override;
+    Move SelectMove(GameEngine& engine, CellState BotColor) override;
 };
 
 

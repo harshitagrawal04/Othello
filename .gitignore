@@ -2,4 +2,6 @@ notes.md
 lib/
 build/
 cmake-build-debug/
+ai_bot/readme.md
 .DS_Store
+.idea/

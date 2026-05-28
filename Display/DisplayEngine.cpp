@@ -13,12 +13,12 @@ DisplayEngine::DisplayEngine()
       Col(0)
 {
     // loading the font
-    if (!font.openFromFile("assists/fonts/Kaushan_Script/KaushanScript-Regular.ttf")) {
+    if (!font.openFromFile("assets/fonts/Kaushan_Script/KaushanScript-Regular.ttf")) {
         cerr << "font not found" << endl;
     }
 }
 
-void DisplayEngine::HandleMouseInput(const auto* mb) {
+void DisplayEngine::HandleMouseInput(const sf::Event::MouseButtonPressed* mb) {
     if (mb->button == sf::Mouse::Button::Left) {
         Col = mb->position.x;
         Row = mb->position.y;
@@ -73,7 +73,7 @@ void DisplayEngine::HandleMouseInput(const auto* mb) {
                 }
             }
             else { // move make by ai
-                Move move = agent->SelectMove(gameEngine);
+                Move move = agent->SelectMove(gameEngine, gameEngine.GetCurrentPlayer());
 
                 // Validate and make move
                 if (gameEngine.IsValidMove({move.row,move.col})) {
@@ -95,12 +95,12 @@ void DisplayEngine::HandleMouseInput(const auto* mb) {
     }
 }
 
-void DisplayEngine::HandleKeyBoardInput(const auto* KeyPressed) {
-    if (KeyPressed->scancode == sf::Keyboard::Scancode::R) {
+void DisplayEngine::HandleKeyBoardInput(const sf::Event::KeyPressed* keyPressed) {
+    if (keyPressed->scancode == sf::Keyboard::Scancode::R) {
         gameEngine.Reset();
         CurrentState = GameState::InGame;
     }
-    if (KeyPressed->scancode == sf::Keyboard::Scancode::U) {
+    if (keyPressed->scancode == sf::Keyboard::Scancode::U) {
         // player can only undo if the game is going on
         if (CurrentState == GameState::InGame) {
             if (agent == nullptr) {
@@ -125,7 +125,7 @@ void DisplayEngine::Render() {
 
         // creating the rectangle shape for the button
         sf::RectangleShape button;
-        button.setSize({CellSize * 2.0f + 10.0f, CellSize});
+        button.setSize({CellSize * 2.5f + 10.0f, CellSize});
         button.setOrigin({CellSize, CellSize / 2.0f});
 
         // creating the text to be displayed
