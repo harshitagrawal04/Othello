@@ -8,11 +8,10 @@
 
 
 
-class MinimaxAlphabeta: public AI {
+class MinimaxAlphabeta: public MinimaxAlphabetaBase, public AI {
     int DEPTH = 4;
-    MinimaxAlphabetaBase BASE;
-    void SetBase();
 public:
+    MinimaxAlphabeta();
     Move SelectMove(GameEngine& engine, CellState BotColor) override;
 };
 

@@ -1,16 +1,14 @@
 #include "MinimaxAlphabeta.h"
 #include <iostream>
-#include <ranges>
 
 
-void MinimaxAlphabeta::SetBase() {
-    BASE.SetDepth(DEPTH);
+MinimaxAlphabeta::MinimaxAlphabeta() {
+    SetDepth(DEPTH);
 }
 
 
 // find a move which convert the maximum number of disk
 Move MinimaxAlphabeta::SelectMove(GameEngine& engine, CellState BotColor) {
-    unordered_map<Move, vector<Move>> move_map = engine.GetLegalMoves();
     Move bestMove{};
     double bestValue = -1.0 * INFINITY;
 
@@ -18,9 +16,9 @@ Move MinimaxAlphabeta::SelectMove(GameEngine& engine, CellState BotColor) {
     double alpha = -1.0 * INFINITY;
     double beta = INFINITY;
 
-    for (const auto &move: move_map | views::keys) {
+    for (const auto& move : GetOrderedMoves(engine)) {
         engine.MakeMove(move.row, move.col);
-        double value = BASE.Alphabeta(engine, depth+1, alpha, beta, BotColor);
+        double value = Alphabeta(engine, depth+1, alpha, beta, BotColor);
         engine.UndoMove();
 
         if (value > bestValue) {

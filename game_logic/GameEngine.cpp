@@ -2,6 +2,7 @@
 #include <unordered_map>
 #include <ranges>
 #include <tuple>
+#include <cmath>
 #include "GameEngine.h"
 #include "Move.h"
 
@@ -37,8 +38,7 @@ vector<Move> GameEngine::GetFlips(Move move) {
 // determine which disks would be flipped if a move is played
 vector<Move> GameEngine::GetFlips(Move move, CellState player) {
     vector<Move> flips;
-    CellState opponent = player == CellState::Black ?
-                           CellState::White : CellState::Black;
+    CellState opponent = GetOpponent();
 
     // skip if cell is already occupied
     if (board[move.row][move.col] != CellState::Empty) {
@@ -88,9 +88,8 @@ vector<Move> GameEngine::GetFlipsMap(Move current_move) {
 
 // return the opponent of the current player
 CellState GameEngine::GetOpponent() {
-    CellState opponent = currentPlayer == CellState::Black ?
-                         CellState::White : CellState::Black;
-    return opponent;
+    return currentPlayer == CellState::Black ?
+           CellState::White : CellState::Black;
 }
 
 /* ---------------------------------------------------------------------------------------
@@ -367,6 +366,103 @@ void GameEngine::UndoAI() {
     UndoMove();
 }
 
+pair<int,int> GameEngine::FrontierCount() {
+    int frontier_black = 0;
+    int frontier_white = 0;
+
+    for (int row = 0; row < BOARD_SIZE; row++) {
+        for (int col = 0; col < BOARD_SIZE; col++) {
+            if(board[row][col] != CellState::Empty) {
+                for (auto& direction: DIRECTIONS) {
+                    int r_pos = row + direction[0];
+                    int c_pos = col + direction[1];
+                    if (InBoard(r_pos, c_pos) && board[r_pos][c_pos] == CellState::Empty) {
+                        if (board[row][col] == CellState::Black)
+                            frontier_black++;
+                        else
+                            frontier_white++;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    return make_pair(frontier_black, frontier_white);
+}
+
+pair<int, int> GameEngine::StableCount() {
+    const int CORNERS[4][2] = { {0, 0}, {0, 7}, {7, 0}, {7, 7} };
+    // diagonal, vertical, anti-diagonal, horizontal
+    const int DIRECTIONS[4][2] = {{1,1}, {1,0}, {1,-1}, {0,1}};
+    int STABLE[BOARD_SIZE][BOARD_SIZE] {};
+
+    int stable_black = 0;
+    int stable_white = 0;
+    int new_stable = 0;
+
+    // 1. Initialize corners
+    for (auto& corner: CORNERS) {
+        int cr = corner[0];
+        int cc = corner[1];
+        if (board[cr][cc] == CellState::Black) {
+            stable_black++;
+            STABLE[cr][cc] = 1;
+        }
+        else if (board[cr][cc] == CellState::White) {
+            stable_white++;
+            STABLE[cr][cc] = 1;
+        }
+    }
+
+    // LAMBDA FUNCTION: Captures local variables by reference
+    auto IsSideSafe = [&](int r, int c, CellState current_color) -> bool {
+        return !InBoard(r, c) || (STABLE[r][c] == 1 && board[r][c] == current_color);
+    };
+
+    // 2. Propagate stability iteratively
+    do {
+        new_stable = 0;
+        for (int row = 0; row < BOARD_SIZE; row++) {
+            for (int col = 0; col < BOARD_SIZE; col++) {
+
+                // Must actually have a piece, and not already be marked stable
+                if (board[row][col] == CellState::Empty || STABLE[row][col] == 1) {
+                    continue;
+                }
+
+                int stable_axes = 0;
+                CellState current_color = board[row][col];
+
+                for (auto& direction: DIRECTIONS) {
+                    // Check positive direction side
+                    bool side1_safe = IsSideSafe(row + direction[0], col + direction[1], current_color);
+
+                    // Check negative direction side correctly using subtraction
+                    bool side2_safe = IsSideSafe(row - direction[0], col - direction[1], current_color);
+
+                    // An axis is safe if it's secure from either side
+                    if (side1_safe || side2_safe) {
+                        stable_axes++;
+                    }
+                }
+
+                // If secure across all 4 axes, it's stable
+                if (stable_axes == 4) {
+                    STABLE[row][col] = 1;
+
+                    if (board[row][col] == CellState::Black)
+                        stable_black++;
+                    else if (board[row][col] == CellState::White)
+                        stable_white++;
+
+                    new_stable++;
+                }
+            }
+        }
+    } while (new_stable > 0);
+
+    return std::make_pair(stable_black, stable_white);
+}
 
 /* ---------------------------------------------------------------------------------------
                                         DISPLAY FUNCTION

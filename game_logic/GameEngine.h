@@ -62,6 +62,8 @@ public:
     vector<int> StateMapIndices();
     tuple<vector<float>, float, bool> Step(int actionIndex); // actor-critic
     void UndoAI();
+    pair<int,int> FrontierCount();
+    pair<int, int> StableCount();
 
 
     // =================== DISPLAY FUNCTIONS ===================

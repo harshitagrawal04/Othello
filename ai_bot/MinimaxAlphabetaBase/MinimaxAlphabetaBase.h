@@ -10,7 +10,12 @@
 class MinimaxAlphabetaBase {
     int DEPTH = 4;
 public:
-    double evaluation(GameEngine& engine, CellState BotColor);
+    CellState GetOpponent(CellState player);
+    vector<Move> GetOrderedMoves(GameEngine& engine);
+    double CoinParity(GameEngine& engine, CellState BotColor);
+    double Mobility(GameEngine& engine, CellState BotColor);
+    double CornerProximityPenalty(GameEngine& engine, CellState BotColor);
+    virtual double Evaluation(GameEngine& engine, CellState BotColor);
     double Alphabeta(GameEngine& engine, int depth, double alpha, double beta, CellState BotColor);
     void SetDepth(int depth) {
         DEPTH = depth;
