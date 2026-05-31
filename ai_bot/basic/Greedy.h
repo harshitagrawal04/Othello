@@ -1,14 +1,14 @@
 #ifndef GREEDY_H
 #define GREEDY_H
 
-#include <iostream>
-#include "../../game_logic/GameEngine.h"
-#include "../../game_logic/Move.h"
-#include "../AI.h"
+#include "game_logic/GameEngine.h"
+#include "data_types/DataTypes.h"
+#include "ai_bot/AI.h"
 
 class Greedy: public AI{
 public:
-    Move SelectMove(GameEngine& engine, CellState BotColor) override;
+    // =================== BOT ACTION EXECUTION ===================
+    Move SelectMove(GameEngine& engine, CellState botColor) override;
 };
 
 

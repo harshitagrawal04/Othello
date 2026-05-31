@@ -1,7 +1,17 @@
-#ifndef MOVE_H
-#define MOVE_H
+#ifndef HISTORY_H
+#define HISTORY_H
 
+#include <vector>
 #include <functional> // For std::hash
+
+
+constexpr int BOARD_SIZE = 8;
+
+enum class CellState {
+    Empty,
+    Black,
+    White
+};
 
 
 struct Move {
@@ -33,4 +43,18 @@ namespace std {
     };
 }
 
-#endif //MOVE_H
+struct History {
+    CellState player;
+    Move move;
+    std::vector<Move> flipped;
+    CellState board[BOARD_SIZE][BOARD_SIZE];
+};
+
+enum class GameState {
+    MainMenu,  // Home screen: select 1-player or 2-player
+    InGame,    // Currently playing Othello on the board
+    GameOver   // Displaying final scores
+};
+
+
+#endif //HISTORY_H

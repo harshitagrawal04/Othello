@@ -1,5 +1,9 @@
 #include "MinimaxAlphabetaBase.h"
+#include "data_types/CommonFunctions.h"
 
+/* ---------------------------------------------------------------------------------------
+                                        VARIABLE
+   ---------------------------------------------------------------------------------------  */
 
 int POSITION_WEIGHTS[8][8] = {
     { 100, -20,  10,  10,  10,  10, -20, 100 },
@@ -14,31 +18,34 @@ int POSITION_WEIGHTS[8][8] = {
 const int CORNER_DIRECTIONS[3][2] = { {0, 1}, {1, 0}, {1, 1} };
 const int CORNERS[4][2] = { {0, 0}, {0, 7}, {7, 0}, {7, 7} };
 
-CellState MinimaxAlphabetaBase::GetOpponent(CellState player) {
-    return player == CellState::Black ?
-           CellState::White : CellState::Black;
-}
+/* ---------------------------------------------------------------------------------------
+                                  SEARCH MOVE GENERATION
+   ---------------------------------------------------------------------------------------  */
 
-vector<Move> MinimaxAlphabetaBase::GetOrderedMoves(GameEngine& engine) {
-    vector<Move> moves = engine.GetKeys();
-    sort(moves.begin(), moves.end(), [&](const Move& a, const Move& b) {
+std::vector<Move> MinimaxAlphabetaBase::GetOrderedMoves(GameEngine& engine) {
+    std::vector<Move> moves = engine.GetKeys();
+    std::ranges::sort(moves, [&](const Move& a, const Move& b) {
         return POSITION_WEIGHTS[a.row][a.col] > POSITION_WEIGHTS[b.row][b.col];
     });
     return moves;
 }
 
-double MinimaxAlphabetaBase::CoinParity(GameEngine& engine, CellState BotColor) {
+/* ---------------------------------------------------------------------------------------
+                                   BASIC HEURISTIC EVALUATION
+   ---------------------------------------------------------------------------------------  */
+
+double MinimaxAlphabetaBase::CoinParity(GameEngine& engine, CellState botColor) {
     auto [black_disk, white_disk] = engine.CountDisk();
-    if (BotColor == CellState::White)
+    if (botColor == CellState::White)
         return  100.0 * (white_disk - black_disk)/(white_disk + black_disk);
     return 100.0 * (black_disk - white_disk)/(white_disk + black_disk);
 }
 
-double MinimaxAlphabetaBase::Mobility(GameEngine& engine, CellState BotColor) {
+double MinimaxAlphabetaBase::Mobility(GameEngine& engine, CellState botColor) {
     double bot_moves, opp_moves;
     auto [black_moves, white_moves] = engine.CountLegalMove();
 
-    if (BotColor == CellState::Black) {
+    if (botColor == CellState::Black) {
         bot_moves = black_moves;
         opp_moves = white_moves;
     }
@@ -52,12 +59,12 @@ double MinimaxAlphabetaBase::Mobility(GameEngine& engine, CellState BotColor) {
             : 0;
 }
 
-double MinimaxAlphabetaBase::CornerProximityPenalty(GameEngine& engine, CellState BotColor) {
+double MinimaxAlphabetaBase::CornerProximityPenalty(GameEngine& engine, CellState botColor) {
     int corner_penalty_count = 0;
 
     const auto& board = engine.GetBoard();
-    CellState my_color = BotColor;
-    CellState opp_color = GetOpponent(BotColor);
+    CellState my_color = botColor;
+    CellState opp_color = GetOpponent(botColor);
 
     for (auto& corner : CORNERS) {
         int cr = corner[0];
@@ -90,25 +97,42 @@ double MinimaxAlphabetaBase::CornerProximityPenalty(GameEngine& engine, CellStat
     return corner_penalty_count;
 }
 
-double MinimaxAlphabetaBase::Evaluation(GameEngine& engine, CellState BotColor) {
+double MinimaxAlphabetaBase::Evaluation(GameEngine& engine, CellState botColor) {
 
-    return   10.0f * CoinParity(engine, BotColor)
-           + 5.0f * Mobility(engine, BotColor)
-           - 8.0f * CornerProximityPenalty(engine, BotColor);
+    return   10.0f * CoinParity(engine, botColor)
+           + 5.0f * Mobility(engine, botColor)
+           - 8.0f * CornerProximityPenalty(engine, botColor);
 }
 
-double MinimaxAlphabetaBase::Alphabeta(GameEngine& engine, int depth, double alpha, double beta, CellState BotColor) {
+/* ---------------------------------------------------------------------------------------
+                                  BASE CASE IF NO MOVE FOUND
+   ---------------------------------------------------------------------------------------  */
+Move MinimaxAlphabetaBase::DefaultMove(GameEngine &engine) {
+    auto orderedMoves = GetOrderedMoves(engine);
+
+    if (orderedMoves.empty()) {
+        return Move{};
+    }
+    return orderedMoves[0];
+}
+
+
+/* ---------------------------------------------------------------------------------------
+                                    CORE SEARCH ALGORITHM
+   ---------------------------------------------------------------------------------------  */
+
+double MinimaxAlphabetaBase::Alphabeta(GameEngine& engine, int depth, double alpha, double beta, CellState botColor) {
     if (depth >= DEPTH || engine.GameEnd()) {
-        return Evaluation(engine, BotColor);
+        return Evaluation(engine, botColor);
     }
 
     // for bot maximize the value
-    if (engine.GetCurrentPlayer() == BotColor) {
+    if (engine.GetCurrentPlayer() == botColor) {
         double max = -1.0 * INFINITY;
 
         for (const auto& move : GetOrderedMoves(engine)) {
             engine.MakeMove(move.row, move.col);
-            double value = Alphabeta(engine, depth+1, alpha, beta, BotColor);
+            double value = Alphabeta(engine, depth+1, alpha, beta, botColor);
             engine.UndoMove();
             max = std::max(max, value);
             alpha = std::max(alpha, value);
@@ -125,7 +149,7 @@ double MinimaxAlphabetaBase::Alphabeta(GameEngine& engine, int depth, double alp
 
     for (const auto& move : GetOrderedMoves(engine)) {
         engine.MakeMove(move.row, move.col);
-        double value = Alphabeta(engine, depth+1, alpha, beta, BotColor);
+        double value = Alphabeta(engine, depth+1, alpha, beta, botColor);
         engine.UndoMove();
         min = std::min(min, value);
         beta = std::min(beta, value);

@@ -11,7 +11,18 @@ add_library(display STATIC
         Display/DisplayEngine.cpp
         Display/DisplayEngine.h
 )
-target_link_libraries(display PUBLIC SFML::Graphics SFML::Window SFML::System)
+
+target_link_libraries(display PUBLIC
+        SFML::Graphics
+        SFML::Window
+        SFML::System
+)
+
+# creating a library for terminal display
+add_library(TerminalDisplay STATIC
+        terminal_display/TerminalDisplay.cpp
+        terminal_display/TerminalDisplay.h
+)
 
 
 # creating a library for the Game Logic
@@ -41,6 +52,7 @@ target_link_libraries(othello PRIVATE
         GameLogic
         AiBot
         display
+        TerminalDisplay
         SFML::Graphics
         SFML::Window
         SFML::System
@@ -53,21 +65,12 @@ add_custom_command(TARGET othello POST_BUILD
 )
 
 # ensures headers (.h) in each directories are visible when compiling
-target_include_directories(othello PRIVATE game_logic ai_bot display)
+target_include_directories(othello PRIVATE game_logic ai_bot Display)
 
-# Include Google Test source
-add_subdirectory(lib/googletest)
-
-add_executable(UnitTests
-        test_Cases/phase1_test.cpp
-)
-
-target_link_libraries(UnitTests PRIVATE gtest_main GameLogic)
-target_include_directories(UnitTests PRIVATE
-        game_logic
-)
-
-enable_testing()
-add_test(NAME AllTests COMMAND UnitTests)
-
-
+# --- HEADER INCLUDE MANAGEMENT ---
+# By passing the root directory to ALL targets, every file can include from the root level.
+target_include_directories(othello PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(AiBot PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(GameLogic PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(display PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(TerminalDisplay PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

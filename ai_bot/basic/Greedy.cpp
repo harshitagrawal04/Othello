@@ -1,17 +1,21 @@
 #include "Greedy.h"
-#include "../../game_logic/GameEngine.h"
+#include "game_logic/GameEngine.h"
+
+/* ---------------------------------------------------------------------------------------
+                                    BOT ACTION EXECUTION
+   ---------------------------------------------------------------------------------------  */
 
 // find a move which convert the maximum number of disk
-Move Greedy::SelectMove(GameEngine& engine, CellState BotColor) {
-    unordered_map<Move, vector<Move>> move_map = engine.GetLegalMoves();
-    Move BestMove{};
+Move Greedy::SelectMove(GameEngine& engine, CellState botColor) {
+    std::unordered_map<Move, std::vector<Move>> moveMap = engine.GetLegalMoves();
+    Move bestMove{};
     int max = 0;
 
-    for (const auto& [move, flips]: move_map) {
+    for (const auto& [move, flips]: moveMap) {
         if (flips.size() > max) {
-            BestMove = move;
+            bestMove = move;
             max = flips.size();
         }
     }
-    return BestMove;
+    return bestMove;
 }

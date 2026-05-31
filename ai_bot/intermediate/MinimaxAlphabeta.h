@@ -1,17 +1,20 @@
 #ifndef MINIMAXHEURISTICEVAL_H
 #define MINIMAXHEURISTICEVAL_H
 
-#include "../../game_logic/GameEngine.h"
-#include "../../game_logic/Move.h"
-#include "../AI.h"
-#include "../MinimaxAlphabetaBase/MinimaxAlphabetaBase.h"
-
+#include "game_logic/GameEngine.h"
+#include "data_types/DataTypes.h"
+#include "ai_bot/AI.h"
+#include "ai_bot/MinimaxAlphabetaBase/MinimaxAlphabetaBase.h"
 
 
 class MinimaxAlphabeta: public MinimaxAlphabetaBase, public AI {
-    int DEPTH = 4;
+    // =================== SEARCH CONFIGURATION ===================
+    int depth = 4;
 public:
+    // =================== CONSTRUCTOR ===================
     MinimaxAlphabeta();
+
+    // =================== BOT ACTION EXECUTION ===================
     Move SelectMove(GameEngine& engine, CellState BotColor) override;
 };
 
