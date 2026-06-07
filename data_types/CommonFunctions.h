@@ -10,10 +10,10 @@ inline CellState GetOpponent(CellState player) {
            CellState::White : CellState::Black;
 }
 
-inline pair<CellState, CellState> GetCellState() {
+inline std::pair<CellState, CellState> GetCellState() {
     CellState AI = GetRandomAIState();
 
-    return make_pair(GetOpponent(AI), AI);
+    return std::make_pair(GetOpponent(AI), AI);
 
 }
 

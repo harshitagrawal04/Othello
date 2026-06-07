@@ -7,15 +7,15 @@
 #include <random>
 
 // helper function to get the agent to play against
-unique_ptr<AI> createAIAgent(const string& type) {
+std::unique_ptr<AI> CreateAIAgent(const std::string& type) {
     if (type == "basic") {
-        return make_unique<Greedy>();
+        return std::make_unique<Greedy>();
     }
     if (type == "intermediate") {
-        return make_unique<MinimaxAlphabeta>();
+        return std::make_unique<MinimaxAlphabeta>();
     }
     if (type == "advance") {
-        return make_unique<HeuristicMinimaxAlphabeta>();
+        return std::make_unique<HeuristicMinimaxAlphabeta>();
     }
     return nullptr; // Return a null to play against friend
 }

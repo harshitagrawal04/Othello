@@ -19,7 +19,7 @@ DisplayEngine::DisplayEngine():
 {
     // loading the font
     if (!font.openFromFile("assets/fonts/Kaushan_Script/KaushanScript-Regular.ttf")) {
-        cerr << "font not found" << endl;
+        std::cerr << "font not found" << std::endl;
     }
 }
 
@@ -72,7 +72,7 @@ void DisplayEngine::HandleMouseInput(const sf::Event::MouseButtonPressed* mb) {
             // converting the mouse input to the coordinate of the board (8X8)
             col = static_cast<int>(mb->position.x / cellSize);
             row = static_cast<int>(mb->position.y / cellSize);
-            std::cout << row << " " << col << endl;
+            std::cout << row << " " << col << std::endl;
 
             CellState currentPlayer = gameEngine.GetCurrentPlayer();
 
@@ -81,7 +81,7 @@ void DisplayEngine::HandleMouseInput(const sf::Event::MouseButtonPressed* mb) {
                 // Validate and make move
                 if (gameEngine.IsValidMove({row,col})) {
                     gameEngine.MakeMove(row, col);
-                    std::cout << "move maked" << endl;
+                    std::cout << "move maked" << std::endl;
                 }
             }
             else { // move make by AI
@@ -90,14 +90,14 @@ void DisplayEngine::HandleMouseInput(const sf::Event::MouseButtonPressed* mb) {
                 // Validate and make move
                 if (gameEngine.IsValidMove({move.row,move.col})) {
                     gameEngine.MakeMove(move.row, move.col);
-                    std::cout << "move maked" << endl;
+                    std::cout << "move maked" << std::endl;
                 }
             }
 
             // handling end game condition
             if (gameEngine.GameEnd()) {
                 currentState = GameState::GameOver;
-                std::cout << "game end" << endl;
+                std::cout << "game end" << std::endl;
             }
         }
     }
@@ -180,7 +180,7 @@ void DisplayEngine::Render() {
 
     else if (currentState == GameState::InGame) {
         const CellState (&currentBoard)[BOARD_SIZE][BOARD_SIZE] = gameEngine.GetBoard();
-        vector<Move> keys = gameEngine.GetKeys();
+        std::vector<Move> keys = gameEngine.GetKeys();
 
         // initial coordinate of the first cell
         const float initial_x = 10.0f;
@@ -246,9 +246,9 @@ void DisplayEngine::Render() {
         auto [black, white] = gameEngine.CountDisk();
 
         // creating the text to be displayed for who has won or was it draw
-        string text_display;
-        if (black >= white) text_display = "Black wins: " + to_string(black) + "\n";
-        else if (white > black) text_display = "White wins: " + to_string(white) + "\n";
+        std::string text_display;
+        if (black >= white) text_display = "Black wins: " + std::to_string(black) + "\n";
+        else if (white > black) text_display = "White wins: " + std::to_string(white) + "\n";
         else text_display = "Draw \n";
 
         // creating the text
@@ -259,12 +259,12 @@ void DisplayEngine::Render() {
 
         // printing the number of disk white have
         text.setPosition({button_X, button_2P_Y});
-        text.setString("White: " + to_string(white) + "\n");
+        text.setString("White: " + std::to_string(white) + "\n");
         mainWindow.draw(text);
 
         // printing the number of disk black have
         text.setPosition({button_X, button_B_Y});
-        text.setString("Black: " + to_string(black) + "\n");
+        text.setString("Black: " + std::to_string(black) + "\n");
         mainWindow.draw(text);
 
         // print the wining colour

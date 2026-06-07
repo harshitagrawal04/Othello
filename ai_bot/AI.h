@@ -10,7 +10,7 @@ public:
 };
 
 // helper function to get the agent to play against
-unique_ptr<AI> CreateAIAgent(const string& type);
+std::unique_ptr<AI> CreateAIAgent(const std::string& type);
 
 // helper function to get the Cellstate colour for the ai
 CellState GetRandomAIState();

@@ -17,7 +17,7 @@ class DisplayEngine {
     GameState currentState;
     int row;
     int col;
-    unique_ptr<AI> agent;
+    std::unique_ptr<AI> agent;
     CellState player1;
     CellState player2; // second player or bot
 

@@ -1,252 +1,234 @@
+# Othello AI
 
-# Roadmap — high level (phases & deliverables)
+> A fully-featured Othello (Reversi) game with a multi-tier AI engine — play against intelligent bots or a friend, all rendered with a clean SFML interface.
 
-## Phase 0 — Project planning & tooling
-
-**Goal:** pick the toolchain and create a reproducible project scaffold.
-**Tasks**
-
-* Choose C++ standard (C++17 or C++20 recommended).
-* Choose build system (CMake recommended).
-* Create git repo and basic folder layout (`src/`, `include/`, `assets/`, `tests/`, `build/`).
-* Create small README with goals and dev notes.
-  **Deliverable:** empty project scaffold with CMake and a trivial “hello” build.
+![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)
+![C++](https://img.shields.io/badge/C++-20-blue?style=flat-square&logo=cplusplus)
+![SFML](https://img.shields.io/badge/SFML-3.0-orange?style=flat-square)
+![Build](https://img.shields.io/badge/build-CMake-red?style=flat-square)
 
 ---
 
-## Phase 1 — Core game model (no UI)
-
-**Goal:** implement pure game rules and a console/test harness so logic is rock-solid.
-**Tasks**
-
-* Design board representation (8×8), constants and enums (BLACK, WHITE, EMPTY).
-* Implement move detection and flipping rules.
-* Methods: initialize board, list legal moves, apply move (with flipping), undo move, count discs, check game end.
-* Add a simple console interface to play moves and display board textually.
-* Unit tests for every rule and edge case.
-  **Deliverable:** testable CLI Reversi engine (can be used independently of UI).
+![Banner](assets/readme/banner.png)
 
 ---
 
-## Phase 2 — Move validation & utilities (correctness & performance)
+## 🎬 Demo
 
-**Goal:** make move-generation robust and efficient.
-**Tasks**
-
-* Optimize legal-move generator (check 8 directions, return flips efficiently).
-* Implement helper utilities: coordinate conversions, move lists, equality/hashing for states.
-* Add an undo stack (store flipped discs / changed cells) for fast undo.
-* Add debug logging & asserts for invariants.
-  **Deliverable:** fast, well-tested move generator and undo support.
+![Gameplay Demo](assets/readme/gameplay.gif)
 
 ---
 
-## Phase 3 — AI design & implementation (three difficulties)
+## 📖 About the Project
 
-**Goal:** implement the three bot levels: Easy, Medium, Hard.
-**Tasks**
+Othello AI is a complete implementation of the classic board game Othello (Reversi) built in C++20. The project features a full game engine with undo/redo history, a polished SFML graphical interface, and a terminal-mode fallback — but the heart of the project is its layered AI system.
 
-* **Easy:** random valid move (or weighted randomness).
-* **Medium:** shallow search (minimax) with a simple heuristic (mobility + corner priority + static positional weights).
-* **Hard:** deeper Minimax with alpha-beta pruning, iterative deepening, move ordering; optionally transposition table (Zobrist hashing) to cache positions.
-* Provide a parameterized AI engine so difficulty = {search depth, heuristic weights, randomness level}.
-* Run self-play tests to sanity-check difficulty differences.
-  **Deliverable:** AIEngine with three selectable difficulty modes.
+Three AI difficulty tiers are available: a fast greedy heuristic, a minimax agent with alpha-beta pruning, and an advanced agent that adds corner capture, disk stability, and frontier analysis to the evaluation function. Each tier uses the same search backbone but progressively richer evaluation, making the difficulty curve feel natural and fair.
 
 ---
 
-## Phase 4 — Rendering & input (game canvas)
+## ✨ Key Features
 
-**Goal:** get a polished, scalable board rendered and respond to mouse input.
-**Tasks**
-
-* Choose a rendering framework (we’ll pick the exact option next — options include SFML, SDL2+OpenGL, GLFW+OpenGL, or Qt).
-* Implement a renderer that:
-
-  * Draws the 8×8 board with crisp lines and retina-aware scaling.
-  * Draws discs with smooth flip animation.
-  * Highlights legal moves on hover and shows current player.
-  * Handles window resizing & DPI scaling.
-* Implement input handling: mouse clicks map to board cells, UI events for menus.
-  **Deliverable:** interactive, well-scaled board canvas with animations.
+- **Three AI Difficulty Tiers** — Basic (Greedy), Intermediate (Minimax α-β, depth 4), and Advanced (Heuristic Minimax α-β, depth 7)
+- **Alpha-Beta Pruning** — Move ordering by positional weights accelerates search and cuts branches efficiently
+- **Rich Evaluation Function** — Advanced agent weighs coin parity, mobility, corner capture, corner proximity penalty, stable discs, and frontier discs
+- **Full Undo Support** — Undo a single move in 2-player mode; undo both bot + player move in AI mode (`U` key)
+- **Complete Move History** — Every board state is saved; the terminal mode can print the full game log
+- **SFML GUI + Terminal Mode** — Swap between a graphical window or a text-based terminal interface by toggling `main.cpp`
+- **Stable Disc Detection** — Iterative propagation algorithm correctly identifies stable discs on all four axes
+- **Random Side Assignment** — When playing against a bot, Black/White is assigned randomly at the start
 
 ---
 
-## Phase 5 — UI shell & polish
+## 🛠️ Tech Stack
 
-**Goal:** add menus, dialogs, settings, and visual polish.
-**Tasks**
-
-* Main menu: New Game, Difficulty selector, Quit.
-* In-game HUD: score, current turn, undo/redo, pass button.
-* Settings: sound on/off, animation speed, board skins (themes).
-* Add subtle animations and sounds for flips, invalid move attempt, game end.
-* Localize strings (optional).
-  **Deliverable:** polished, modern UI around the canvas.
+| Layer        | Technology                          |
+| ------------ | ----------------------------------- |
+| Language     | C++ 20                              |
+| Build System | CMake 3.31+                         |
+| Graphics     | SFML 3.0 (Graphics, Window, System) |
+| AI Search    | Minimax + Alpha-Beta Pruning        |
+| Architecture | Static libraries per module         |
 
 ---
 
-## Phase 6 — Integration, concurrency & UX robustness
+## ⚙️ Getting Started
 
-**Goal:** merge logic, AI, and UI into a smooth user experience.
-**Tasks**
+### Prerequisites
 
-* Architecture: separate Model (game logic), View (renderer), Controller (input & UI). Keep coupling low.
-* Run AI in background threads so UI remains responsive. Handle thread safety (copy state for AI, or use mutexes carefully).
-* Add an event/message queue between game model and UI.
-* Implement save/load game and persistent settings.
-  **Deliverable:** non-blocking gameplay, stable integration.
+- **C++20** compatible compiler (GCC 12+, Clang 14+, or MSVC 2022+)
+- **CMake** 3.31 or higher
+- **SFML 3.0** installed on your system
 
----
+#### Installing SFML 3.0
 
-## Phase 7 — Testing, profiling & polish
+**macOS (Homebrew):**
 
-**Goal:** find and fix logic, performance, and UX bugs.
-**Tasks**
+```bash
+brew install sfml
+```
 
-* Unit tests for model & AI; integration tests for end-to-end flows.
-* Fuzz test move generation (random sequences).
-* Profile AI to ensure hard difficulty is performant; add incremental improvements (move ordering, caching).
-* Gather a short playtest checklist and address common issues (incorrect flipping, ties, passes).
-  **Deliverable:** stable, tested product.
+**Ubuntu / Debian:**
 
----
+```bash
+sudo apt-get install libsfml-dev
+```
 
-## Phase 8 — Packaging & distribution (macOS)
-
-**Goal:** produce a macOS app bundle you can run/share.
-**Tasks**
-
-* Create a macOS app bundle (`.app`) using CMake/Xcode build settings or `cpack`.
-* Prepare assets (icons, retina resources).
-* (Optional later) codesign and notarize if you want to distribute widely.
-  **Deliverable:** runnable `.app` for macOS.
+**Windows:**  
+Download from [sfml-dev.org](https://www.sfml-dev.org/download.php) and follow the CMake integration guide.
 
 ---
 
-## Phase 9 — Optional advanced features
+### Installation
 
-**Ideas you can add later**
+```bash
+# 1. Clone the repository
+git clone https://github.com/azurvane/othello.git
+cd othello
 
-* Network multiplayer (peer-to-peer or server).
-* Replayer: export/import game records, step through moves.
-* Tournament mode and AI self-play logs.
-* Adaptive AI that learns weights from play (research project).
-* Accessibility: keyboard controls, colorblind-friendly palettes.
+# 2. Create a build directory
+mkdir build && cd build
+
+# 3. Configure with CMake
+cmake ..
+
+# 4. Build
+cmake --build .
+
+# 5. Run
+./othello
+```
+
+> **Note:** The `assets/` folder is automatically copied to the build directory by CMake post-build. Ensure the font file exists at `assets/fonts/Kaushan_Script/KaushanScript-Regular.ttf` before running.
 
 ---
 
-# Suggested milestones (release slices)
+### Switching to Terminal Mode
 
-* **M0 (proof):** Phase 0 + Phase 1 — console engine that enforces rules.
-* **M1 (AI):** Add Phase 3 — three AI difficulties, CLI play vs AI.
-* **M2 (graphics):** Phase 4 — board rendered and interactive.
-* **M3 (polish):** Phase 5 + 6 — full UI and smooth gameplay.
-* **M4 (ship):** Phase 7 + 8 — tested app bundle.
+To run the game without SFML in the terminal, open `main.cpp` and swap the active `main` function:
+
+```cpp
+// Comment this out:
+// int main() {
+//     DisplayEngine display;
+//     display.Run();
+//     return 0;
+// }
+
+// Uncomment this:
+int main() {
+    TerminalDisplay display;
+    display.Run();
+    return 0;
+}
+```
+
+Then rebuild with `cmake --build .`
 
 ---
 
+## 🎮 Usage
+
+### Main Menu
 
 
+![Main Menu](assets/readme/menu.png)
 
+On launch you'll see four options:
 
+| Option                  | Description                                           |
+| ----------------------- | ----------------------------------------------------- |
+| **1. 2 Player**         | Local two-player mode, no AI                          |
+| **2. Basic bot**        | Greedy AI — picks the move that flips the most discs  |
+| **3. Intermediate bot** | Minimax α-β at depth 4 with positional heuristics     |
+| **4. Advance bot**      | Minimax α-β at depth 7 with full strategic evaluation |
 
+### In-Game Controls
 
+| Input          | Action                                     |
+| -------------- | ------------------------------------------ |
+| **Left Click** | Place a disc on a valid (highlighted) cell |
+| **U**          | Undo last move                             |
+| **R**          | Reset the current game                     |
+| **M**          | Return to Main Menu                        |
+| **Q**          | Quit the application                       |
 
+### Terminal Mode Controls
 
+When running in terminal mode, enter moves as a row letter and column number:
 
+```
+enter the move (row, col)
+u for undo
+r for reset
+m for main menu
+q for quit
 
+> A 3
+```
 
+---
 
+## 🧠 AI Architecture
 
+The AI system is structured in three layers built on a shared base:
 
+```
+MinimaxAlphabetaBase        ← shared search engine + basic heuristics
+    ├── MinimaxAlphabeta    ← intermediate agent (depth 4)
+    └── HeuristicMinimaxAlphabeta  ← advanced agent (depth 7, richer eval)
+Greedy                      ← basic agent (no search tree)
+```
 
+### Evaluation Components
 
+| Component        | Weight (Advanced) | Description                                       |
+| ---------------- | ----------------- | ------------------------------------------------- |
+| Corner Capture   | ×30               | Reward/penalise owning corners                    |
+| Stability        | ×15               | Ratio of unflippable discs                        |
+| Mobility         | ×5                | Ratio of available legal moves                    |
+| Frontier Discs   | −10               | Penalise discs exposed to empty cells             |
+| Corner Proximity | −12               | Penalise occupying X/C squares near empty corners |
 
+---
 
+## 📁 Project Structure
 
+```
+othello-ai/
+├── main.cpp
+├── CMakeLists.txt
+├── assets/
+│   └── fonts/
+├── game_logic/
+│   ├── GameEngine.cpp
+│   └── GameEngine.h
+├── ai_bot/
+│   ├── AI.h
+│   ├── SelectAIAgent.cpp
+│   ├── basic/          (Greedy)
+│   ├── intermediate/   (MinimaxAlphabeta)
+│   ├── advance/        (HeuristicMinimaxAlphabeta)
+│   └── MinimaxAlphabetaBase/
+├── display/
+│   ├── DisplayEngine.cpp
+│   └── DisplayEngine.h
+├── terminal_display/
+│   ├── TerminalDisplay.cpp
+│   └── TerminalDisplay.h
+└── data_types/
+    ├── DataTypes.h
+    └── CommonFunctions.h
+```
 
+---
 
+## 📜 License
 
+Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for full terms.
 
+---
 
+## 👤 Author
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
-\
+**azurvane** — [@azurvane](https://github.com/azurvane)
